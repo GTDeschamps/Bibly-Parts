@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 const Header = () => {
   const [isAccountMenuOpen, setAccountMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

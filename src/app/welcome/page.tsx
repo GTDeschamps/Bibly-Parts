@@ -33,7 +33,7 @@ const welcomepage = () => {
 	return (
 		<div className="bg-[#f5f5dc] min-h-screen py-10 px-4 md:px-12 relative max-h-screen overflow-y-auto">
 		  {/* Filigrane d'image */}
-		  <div className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-10" style={{ backgroundImage: "url('/filigrane.png')" }}></div>
+		  <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{ backgroundImage: "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')" }}></div>
 
 		  <Section title="Partition à la Une" partitions={featuredPartitions} />
 		  <Section title="Tablature à la Une" partitions={featuredPartitions} />

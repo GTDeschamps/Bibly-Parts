@@ -11,8 +11,14 @@ const Signup = () => {
   const isLogin = searchParams?.get("mode") === "login";
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[rgb(245,245,220)] bg-[url('/images/partition.png')] bg-cover">
-      <div className="w-full max-w-md p-8 bg-white bg-opacity-80 rounded-lg shadow-md">
+    <div className="relative min-h-screen flex justify-center items-center p-8 bg-beige">
+      {/* Image de fond avec transparence */}
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{ backgroundImage: "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')" }}
+      ></div>
+
+      <div className="relative z-10 p-6 w-full max-w-2xl">
         {isLogin ? (
           <>
             <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Connexion</h2>

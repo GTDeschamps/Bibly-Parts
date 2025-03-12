@@ -5,24 +5,55 @@ import Section from "../component/Section";
 
 interface Partition {
 	id: number;
-	image: string;
 	title: string;
-	album: string;
 	author: string;
-	type: string;
+	instrument: string;
+	style: string;
+	support: string;
+	booklet: string;
 	price: number;
 }
-
 const FavoritesPage: React.FC = () => {
 	const [favorites, setFavorites] = useState<Partition[]>([]);
 
 	// Charger les favoris depuis localStorage si l'utilisateur est connecté
 	useEffect(() => {
-	  const storedFavorites = localStorage.getItem("favorites");
-	  if (storedFavorites) {
-		setFavorites(JSON.parse(storedFavorites));
-	  }
-	}, []);
+		const storedFavorites = localStorage.getItem("favorites");
+		if (storedFavorites) {
+		  try {
+			const parsedFavorites = JSON.parse(storedFavorites);
+			console.log("Données récupérées depuis localStorage :", parsedFavorites);
+
+			if (Array.isArray(parsedFavorites)) {
+			  // Vérifier que chaque élément a bien toutes ses propriétés
+			  const validFavorites = parsedFavorites.filter(
+				(item) =>
+				  item &&
+				  typeof item === "object" &&
+				  "id" in item &&
+				  "title" in item &&
+				  "author" in item &&
+				  "instrument" in item &&
+				  "style" in item &&
+				  "support" in item &&
+				  "booklet" in item &&
+				  "price" in item
+			  );
+
+			  console.log("Partitions valides après filtrage :", validFavorites);
+			  setFavorites(validFavorites);
+			} else {
+			  setFavorites([]);
+			}
+		  } catch (error) {
+			console.error("Erreur lors du parsing des favoris :", error);
+			setFavorites([]);
+		  }
+		} else {
+		  setFavorites([]);
+		}
+	  }, []);
+
 
 	// Supprimer un favori
 	const removeFromFavorites = (id: number) => {
@@ -45,18 +76,18 @@ const FavoritesPage: React.FC = () => {
 					</p>
 				) : (
 					<div className="space-y-4">
-						{favorites.map((partition) => (
+						{favorites.filter((partition) => partition).map((partition) => (
+
 							<div key={partition.id} className="flex items-center justify-between border-b pb-2">
 								<div className="flex items-center">
 									<img
-										src={partition.image}
 										alt={partition.title}
 										className="w-12 h-12 rounded-md"
 									/>
 									<div className="ml-4">
 										<h3 className="text-lg font-semibold">{partition.title}</h3>
-										<p className="text-gray-600">{partition.album}</p>
-										<p className="text-gray-600">{partition.author} - {partition.type}</p>
+										<p className="text-gray-600">{partition.booklet}</p>
+										<p className="text-gray-600">{partition.author} - {partition.support}</p>
 									</div>
 								</div>
 								<div className="flex items-center space-x-4">

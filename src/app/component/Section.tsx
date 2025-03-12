@@ -8,12 +8,16 @@ interface SectionProps {
   id: string;
   title: string;
   author: string;
+  instrument: string;
+  style: string;
   support: string;
+  booklet: string;
+  price: number;
   isFavoritePage?: boolean;
   onUnfavorite?: () => void;
 }
 
-const Section = ({ id, title, author, support, isFavoritePage = false, onUnfavorite }: SectionProps) => {
+const Section = ({ id, title, author, instrument, style, support, booklet, price, isFavoritePage = false, onUnfavorite }: SectionProps) => {
   const [open, setOpen] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
@@ -25,19 +29,35 @@ const Section = ({ id, title, author, support, isFavoritePage = false, onUnfavor
   }, []);
 
   const handleAddToFavorites = () => {
-    const updatedFavorites = [...favorites, id];
+    if (!id) {
+      console.error("L'ID est undefined, impossible de remonter cette partition !");
+      return; // Empêche d'ajouter un élément invalide
+    }
+    const partitionToAdd = { id, title, author, instrument, style, support, booklet, price }; // Création de l'objet complet
+
+    const storedFavorites = localStorage.getItem("favorites");
+    const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
+
+    const updatedFavorites = [...favorites, partitionToAdd]; // Stocker l'objet entier
     setFavorites(updatedFavorites);
     localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-    console.log(`Ajouté aux favoris : ${id}`);
+
+    console.log("Ajouté aux favoris :", partitionToAdd);
   };
 
+
   const handleRemoveFromFavorites = () => {
-    const updatedFavorites = favorites.filter(favId => favId !== id);
+    const storedFavorites = localStorage.getItem("favorites");
+    const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
+
+    const updatedFavorites = favorites.filter(partition => partition && partition.id !== id); // Filtrer par ID
     setFavorites(updatedFavorites);
     localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-    console.log(`Retiré des favoris : ${id}`);
+
+    console.log(`Retiré des favoris :`, id);
     if (onUnfavorite) onUnfavorite();
   };
+
 
   const handleAddToCart = () => {
     const updatedCart = [...cart, id];

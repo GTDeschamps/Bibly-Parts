@@ -124,7 +124,15 @@ const FilterPage = () => {
 				<div className="mt-4 p-4 border-2 border-blue-600 rounded-lg">
 					{filteredResults.length > 0 ? (
 						filteredResults.map((item, index) => (
-							<Section key={index} title={item.title} author={item.author} support={item.support} />
+							<Section key={item.id}
+							id={item.id}  // <- L'ID doit être passé ici
+							title={item.title}
+							author={item.author}
+							instrument={item.instrument}
+							style={item.style}
+							support={item.support}
+							booklet={item.booklet}
+							price={item.price}/>
 						))
 					) : (
 						<p className="text-gray-500">Aucun résultat trouvé</p>

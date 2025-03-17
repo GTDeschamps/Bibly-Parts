@@ -10,8 +10,8 @@ const getRandomItems = (array: any[], n: number) => {
 };
 
 const WelcomePage = () => {
-	const [featuredPartitions, setFeaturedPartitions] = useState([]);
-	const [featuredTablatures, setFeaturedTablatures] = useState([]);
+	const [featuredPartitions, setFeaturedPartitions] = useState<any[]>([]);
+	const [featuredTablatures, setFeaturedTablatures] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
@@ -46,7 +46,7 @@ const WelcomePage = () => {
 			<div className="bg-[#f5f5dc] min-h-screen py-10 px-4 md:px-12 relative max-h-screen overflow-y-auto">
 				{/* Filigrane d'image */}
 				<div
-					className="absolute inset-0 bg-cover bg-center opacity-20"
+					className="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none"
 					style={{
 						backgroundImage:
 							"url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')",
@@ -59,15 +59,16 @@ const WelcomePage = () => {
 						Partition à la Une
 					</h2>
 					<div className="space-y-4">
-						{featuredPartitions.map((partition) => (
-							<Section
-								key={partition.id}
-								id={partition.id}
-								title={partition.title}
-								author={partition.author}
-								support={partition.support}
-								album={partition.album}
-								price={partition.price}
+						{featuredPartitions.map((item, index) => (
+							<Section key={item.id}
+								id={item.id}
+								title={item.title}
+								author={item.author}
+								support={item.support}
+								booklet={item.booklet}
+								price={item.price}
+								instrument={item.instrument}
+								style={item.style}
 							/>
 						))}
 					</div>
@@ -79,16 +80,17 @@ const WelcomePage = () => {
 						Tablature à la Une
 					</h2>
 					<div className="space-y-4">
-						{featuredTablatures.map((tablature) => (
-							<Section
-								key={tablature.id}
-								id={tablature.id}
-								title={tablature.title}
-								author={tablature.author}
-								support={tablature.support}
-								album={tablature.album}
-								price={tablature.price}
-							/>
+						{featuredTablatures.map((item) => (
+							<Section key={item.id}
+							id={item.id}
+							title={item.title}
+							author={item.author}
+							support={item.support}
+							booklet={item.booklet}
+							price={item.price}
+							instrument={item.instrument}
+							style={item.style}
+						/>
 						))}
 					</div>
 				</div>

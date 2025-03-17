@@ -71,7 +71,15 @@ const FilterPage = () => {
 
 
 	return (
-		<div className="min-h-screen bg-[#f5f5dc] p-6 relative">
+		<div className="bg-[#f5f5dc] min-h-screen py-10 px-4 md:px-12 relative max-h-screen overflow-y-auto">
+			{/* Filigrane d'image */}
+			<div
+					className="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none"
+					style={{
+						backgroundImage:
+							"url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')",
+					}}
+				></div>
 			<div className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-20" style={{ backgroundImage: "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')" }}></div>
 
 			<div className="relative p-6">

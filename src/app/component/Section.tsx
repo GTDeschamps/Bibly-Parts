@@ -1,6 +1,6 @@
 "use client";
 
-import { Play, Heart, Info, ShoppingCart, Menu as MenuIcon, FileText, Ban } from "lucide-react";
+import { Play, Heart, Info, ShoppingCart, Menu as MenuIcon, Ban } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +15,7 @@ interface SectionProps {
   price: number;
   isFavoritePage?: boolean;
   onUnfavorite?: () => void;
+  onUnCart?: () => void;
 }
 
 const Section = ({ id, title, author, instrument, style, support, booklet, price, isFavoritePage = false, onUnfavorite }: SectionProps) => {
@@ -23,52 +24,71 @@ const Section = ({ id, title, author, instrument, style, support, booklet, price
   const [cart, setCart] = useState<string[]>([]);
   const router = useRouter();
 
+  // 🔹 Chargement initial des favoris et du panier
   useEffect(() => {
-    setFavorites(JSON.parse(localStorage.getItem("favorites") || "[]"));
-    setCart(JSON.parse(localStorage.getItem("cart") || "[]"));
+    try {
+      setFavorites(JSON.parse(localStorage.getItem("favorites") || "[]"));
+      setCart(JSON.parse(localStorage.getItem("cart") || "[]"));
+    } catch (error) {
+      console.error("Erreur lors du chargement du localStorage :", error);
+    }
   }, []);
 
+  // 🔹 Sauvegarde des favoris
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
+
+  // 🔹 Sauvegarde du panier
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  // Ajout aux favoris
   const handleAddToFavorites = () => {
-    if (!id) {
-      console.error("L'ID est undefined, impossible de remonter cette partition !");
-      return; // Empêche d'ajouter un élément invalide
-    }
-    const partitionToAdd = { id, title, author, instrument, style, support, booklet, price }; // Création de l'objet complet
-
-    const storedFavorites = localStorage.getItem("favorites");
-    const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
-
-    const updatedFavorites = [...favorites, partitionToAdd]; // Stocker l'objet entier
-    setFavorites(updatedFavorites);
-    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-
-    console.log("Ajouté aux favoris :", partitionToAdd);
+    if (!id) return console.error("L'ID est undefined !");
+    const newFavorites = [...favorites, { id, title, author, instrument, style, support, booklet, price }];
+    setFavorites(newFavorites);
+    console.log("Ajouté aux favoris :", title);
   };
 
-
+  // Suppression des favoris
   const handleRemoveFromFavorites = () => {
-    const storedFavorites = localStorage.getItem("favorites");
-    const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
-
-    const updatedFavorites = favorites.filter(partition => partition && partition.id !== id); // Filtrer par ID
+    const updatedFavorites = favorites.filter(partition => partition.id !== id);
     setFavorites(updatedFavorites);
-    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-
-    console.log(`Retiré des favoris :`, id);
+    console.log("Retiré des favoris :", title);
     if (onUnfavorite) onUnfavorite();
   };
 
-
+  // Ajout au panier
   const handleAddToCart = () => {
-    const updatedCart = [...cart, id];
+    console.log("Tentative d'ajout au panier - ID:", id);
+
+    if (!id) {
+      console.error("L'ID est undefined, impossible d'ajouter au panier !");
+      return;
+    }
+
+    const partitionToAdd = { id, title, author, instrument, style, support, booklet, price };
+    const updatedCart = [...cart, partitionToAdd];
+
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-    console.log(`Ajouté au panier : ${id}`);
+
+    console.log(`Ajouté au panier :`, partitionToAdd);
   };
 
-  const handlePlay = () => {
-    console.log(`Lecture du morceau : ${id}`);
-  };
+    // Suppression du panier
+    const handleRemoveFromCart = () => {
+      const updatedCart = cart.filter(partition => partition.id !== id);
+      setCart(updatedCart);
+      console.log("Retiré du panier :", title);
+      if (onUnCart) onUnCart();
+    };
+
+
+  // Lecture du morceau
+  const handlePlay = () => console.log(`Lecture du morceau : ${title}`);
 
   return (
     <div className="border-b last:border-none py-4 flex justify-between items-center">

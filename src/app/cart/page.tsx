@@ -35,11 +35,13 @@ const CartPage = () => {
 
   const handleRemoveFromCart = (id: number) => {
     const updatedCart = cart.filter((item) => item.id !== id);
+    console.log("❌ Retrait du panier :", id);
     setCart(updatedCart);
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
 
-  const totalPrice = Number(cart.reduce((sum, item) => sum + (item.price || 0), 0));
+  const totalPrice = cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
+
 
   return (
     <div className="bg-[#f5f5dc] min-h-screen p-8 relative">

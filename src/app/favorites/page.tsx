@@ -15,53 +15,56 @@ interface Partition {
 }
 const FavoritesPage: React.FC = () => {
 	const [favorites, setFavorites] = useState<Partition[]>([]);
+	console.log("favoris de la page favoris", favorites);
 
-	// Charger les favoris depuis localStorage si l'utilisateur est connecté
+	// 	// Charger les favoris depuis localStorage si l'utilisateur est connecté
 	useEffect(() => {
-		const storedFavorites = localStorage.getItem("favorites");
-		if (storedFavorites) {
-		  try {
-			const parsedFavorites = JSON.parse(storedFavorites);
-			console.log("Données récupérées depuis localStorage :", parsedFavorites);
-
-			if (Array.isArray(parsedFavorites)) {
-			  // Vérifier que chaque élément a bien toutes ses propriétés
-			  const validFavorites = parsedFavorites.filter(
-				(item) =>
-				  item &&
-				  typeof item === "object" &&
-				  "id" in item &&
-				  "title" in item &&
-				  "author" in item &&
-				  "instrument" in item &&
-				  "style" in item &&
-				  "support" in item &&
-				  "booklet" in item &&
-				  "price" in item
-			  );
-
-			  console.log("Partitions valides après filtrage :", validFavorites);
-			  setFavorites(validFavorites);
+		const syncFavorites = () => {
+			const storedFavorites = localStorage.getItem("favorites");
+			if (storedFavorites) {
+				try {
+					const parsedFavorites = JSON.parse(storedFavorites);
+					console.log("Données récupérées depuis localStorage :", parsedFavorites);
+					setFavorites(parsedFavorites.reverse());
+				} catch (error) {
+					console.error("Erreur lors du parsing des favoris :", error);
+					setFavorites([]);
+				}
 			} else {
-			  setFavorites([]);
+				setFavorites([]);
 			}
-		  } catch (error) {
-			console.error("Erreur lors du parsing des favoris :", error);
-			setFavorites([]);
-		  }
-		} else {
-		  setFavorites([]);
-		}
-	  }, []);
+		};
+
+		// 🔥 Exécuter immédiatement
+		syncFavorites();
+
+		// 🔥 Écouter les changements dans localStorage
+		window.addEventListener("storage", syncFavorites);
+
+		return () => {
+			window.removeEventListener("storage", syncFavorites);
+		};
+	}, []);
 
 
-	// Supprimer un favori
-	const removeFromFavorites = (id: number) => {
-	  const updatedFavorites = favorites.filter((partition) => partition.id !== id);
-	  setFavorites(updatedFavorites);
-	  // Mise à jour dans localStorage
-	  localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+
+	// 	// Supprimer un favori
+	const handleRemoveFromFavorites = (id: string) => {
+		console.log(`Suppression de l'élément avec ID : ${id}`);
+
+		// Supprimer la partition des favoris
+		const updatedFavorites = favorites.filter((partition) => partition.id !== Number(id));
+
+		// Mettre à jour `localStorage`
+		localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+
+		// Mettre à jour le state React
+		setFavorites(updatedFavorites);
+
+		// 🔥 Forcer la mise à jour de `Section.tsx`
+		window.dispatchEvent(new Event("storage"));
 	};
+
 
 	return (
 		<div className="bg-[#f5f5dc] min-h-screen p-8">
@@ -78,27 +81,18 @@ const FavoritesPage: React.FC = () => {
 					<div className="space-y-4">
 						{favorites.filter((partition) => partition).map((partition) => (
 
-							<div key={partition.id} className="flex items-center justify-between border-b pb-2">
-								<div className="flex items-center">
-									<img
-										alt={partition.title}
-										className="w-12 h-12 rounded-md"
-									/>
-									<div className="ml-4">
-										<h3 className="text-lg font-semibold">{partition.title}</h3>
-										<p className="text-gray-600">{partition.booklet}</p>
-										<p className="text-gray-600">{partition.author} - {partition.support}</p>
-									</div>
-								</div>
-								<div className="flex items-center space-x-4">
-
 									<Section
+										id={partition.id.toString()}
+										title={partition.title}
+										author={partition.author}
+										instrument={partition.instrument}
+										style={partition.style}
+										support={partition.support}
+										booklet={partition.booklet}
+										price={partition.price}
 										isFavoritePage={true}
-										onUnfavorite={() => removeFromFavorites(partition.id)}
+										onUnfavorite={() => handleRemoveFromFavorites(partition.id.toString())}
 									/>
-									<span className="text-lg font-semibold">{partition.price}€</span>
-								</div>
-							</div>
 
 						))}
 					</div>

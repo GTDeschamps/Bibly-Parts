@@ -129,7 +129,7 @@ const FilterPage = () => {
 				</div>
 
 				{/* Résultats */}
-				<div className="mt-4 p-4 border-2 border-blue-600 rounded-lg">
+				<div className= "mt-4 p-4 border-2 border-blue-600 rounded-lg">
 					{filteredResults.length > 0 ? (
 						filteredResults.map((item, index) => (
 							<Section key={item.id}

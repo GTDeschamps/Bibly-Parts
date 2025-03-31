@@ -18,74 +18,146 @@ interface SectionProps {
   onUnCart?: () => void;
 }
 
+interface Partition {
+  id: string;
+  title: string;
+  author: string;
+  instrument: string;
+  style: string;
+  support: string;
+  booklet: string;
+  price: number;
+}
 const Section = ({ id, title, author, instrument, style, support, booklet, price, isFavoritePage = false, onUnfavorite }: SectionProps) => {
   const [open, setOpen] = useState(false);
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [cart, setCart] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<Partition[]>([]);
+  const [cart, setCart] = useState<Partition[]>([]);
   const router = useRouter();
 
-  // 🔹 Chargement initial des favoris et du panier
+
+  // 🔹 Chargement initial des favoris
   useEffect(() => {
     try {
-      setFavorites(JSON.parse(localStorage.getItem("favorites") || "[]"));
-      setCart(JSON.parse(localStorage.getItem("cart") || "[]"));
+      const storedFavorites = localStorage.getItem("favorites");
+
+      if (storedFavorites) {
+        console.log("🟢 Favoris récupérés après rechargement :", JSON.parse(storedFavorites));
+        setFavorites(JSON.parse(storedFavorites));
+      } else {
+        console.warn("🟠 Aucun favoris trouvé après rechargement.");
+        setFavorites([]);
+      }
     } catch (error) {
-      console.error("Erreur lors du chargement du localStorage :", error);
+      console.error("🔴 Erreur lors du chargement des favoris :", error);
+      setFavorites([]);
     }
   }, []);
 
+    // 🔹 Chargement initial du panier
+    useEffect(() => {
+      try {
+        const storedCart = localStorage.getItem("cart");
+
+        if (storedCart) {
+          console.log("🟢 Panier récupérés après rechargement :", JSON.parse(storedCart));
+          setCart(JSON.parse(storedCart));
+        } else {
+          console.warn("🟠 Panier vide après rechargement.");
+          setCart([]);
+        }
+      } catch (error) {
+        console.error("🔴 Erreur lors du chargement du panier :", error);
+        setCart([]);
+      }
+    }, []);
+
+
   // 🔹 Sauvegarde des favoris
   useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+    if (favorites.length > 0) { // 🔥 Ne met à jour que si `favorites` contient quelque chose
+      console.log("✅ Mise à jour de localStorage avec :", favorites);
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+    // } else (favorites.length = 0); {
+    //   console.warn("⚠️ Évité d'écraser localStorage avec une liste vide.");
+    }
   }, [favorites]);
 
-  // 🔹 Sauvegarde du panier
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
 
   // Ajout aux favoris
   const handleAddToFavorites = () => {
-    if (!id) return console.error("L'ID est undefined !");
-    const newFavorites = [...favorites, { id, title, author, instrument, style, support, booklet, price }];
-    setFavorites(newFavorites);
-    console.log("Ajouté aux favoris :", title);
-  };
+    if (!id) return console.error("❌ L'ID est undefined, impossible d'ajouter aux favoris !");
 
-  // Suppression des favoris
-  const handleRemoveFromFavorites = () => {
-    const updatedFavorites = favorites.filter(partition => partition.id !== id);
-    setFavorites(updatedFavorites);
-    console.log("Retiré des favoris :", title);
-    if (onUnfavorite) onUnfavorite();
-  };
+    const partitionToAdd: Partition = { id, title, author, instrument, style, support, booklet, price };
 
-  // Ajout au panier
-  const handleAddToCart = () => {
-    console.log("Tentative d'ajout au panier - ID:", id);
+    // 🔹 Récupérer les favoris ACTUELS depuis localStorage
+    const storedFavorites = localStorage.getItem("favorites");
+    const existingFavorites: Partition[] = storedFavorites ? JSON.parse(storedFavorites) : [];
 
-    if (!id) {
-      console.error("L'ID est undefined, impossible d'ajouter au panier !");
+    console.log("📌 Favoris AVANT ajout :", existingFavorites);
+
+    // 🔹 Vérifier si l’élément existe déjà
+    if (existingFavorites.some((fav) => fav.id === id)) {
+      console.warn("⚠️ Cette partition est déjà dans les.");
       return;
     }
 
-    const partitionToAdd = { id, title, author, instrument, style, support, booklet, price };
-    const updatedCart = [...cart, partitionToAdd];
+    // 🔹 Ajouter la nouvelle partition aux favoris
+    const updatedFavorites = [...existingFavorites, partitionToAdd];
 
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    console.log("✅ Favoris APRÈS ajout :", updatedFavorites);
 
-    console.log(`Ajouté au panier :`, partitionToAdd);
+    // 🔹 Mettre à jour localStorage et l’état
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+    setFavorites(updatedFavorites);
   };
 
-    // Suppression du panier
-    const handleRemoveFromCart = () => {
-      const updatedCart = cart.filter(partition => partition.id !== id);
-      setCart(updatedCart);
-      console.log("Retiré du panier :", title);
-      if (onUnCart) onUnCart();
-    };
 
+
+  // ✅ **Suppression des favoris (corrigé)**
+  const handleRemoveFromFavorites = () => {
+    console.log(`🔴 Suppression de la partition avec ID : ${id}`);
+
+    // Mettre à jour localStorage
+    const updatedFavorites = favorites.filter((partition) => partition.id !== id);
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+
+    // Mettre à jour l'état local
+    setFavorites(updatedFavorites);
+
+    // 🔥 Informer la page principale (FavoritesPage) qu'on a supprimé un élément
+    if (onUnfavorite) {
+        onUnfavorite();
+    }
+};
+
+
+   // ✅ **Ajout au panier sans écraser les anciens éléments**
+   const handleAddToCart = () => {
+    if (!id) return console.error("❌ L'ID est undefined, impossible d'ajouter au Panier !");
+
+    const partitionToAdd: Partition = { id, title, author, instrument, style, support, booklet, price };
+
+    // 🔹 Récupérer le panier actuel depuis localStorage
+    const storedCart = localStorage.getItem("cart");
+    const existingCart: Partition[] = storedCart ? JSON.parse(storedCart) : [];
+
+    console.log("📌 PANIER AVANT ajout :", existingCart);
+
+    // 🔹 Vérifier si l’élément existe déjà
+    if (existingCart.some((cart) => cart.id === id)) {
+      console.warn("⚠️ Cette partition est déjà dans le panier.");
+      return;
+    }
+
+    // 🔹 Ajouter la nouvelle partition au panier
+    const updatedCart = [...existingCart, partitionToAdd];
+
+    console.log("✅ Panier APRÈS ajout :", updatedCart);
+
+    // 🔹 Mettre à jour localStorage et l’état
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    setCart(updatedCart);
+  };
 
   // Lecture du morceau
   const handlePlay = () => console.log(`Lecture du morceau : ${title}`);
@@ -114,6 +186,7 @@ const Section = ({ id, title, author, instrument, style, support, booklet, price
             <Heart size={20} />
           </button>
         )}
+
         <button onClick={() => router.push(`/description/${id}`)} className="p-2 text-blue-500 hover:text-[#ff6100]">
           <Info size={20} />
         </button>

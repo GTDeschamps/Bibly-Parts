@@ -3,17 +3,19 @@
 import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import {app} from "@/lib/firebaseConfig"; // Assurez-vous que le chemin est correct
 
 const UserAccount = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<{ displayName?: string; email: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        setUser(firebaseUser);
+        setUser({
+          displayName: firebaseUser.displayName || undefined,
+          email: firebaseUser.email || "Email non disponible",
+        });
       } else {
         // Redirige si l'utilisateur n'est pas connecté
         router.push("/signup?mode=login");

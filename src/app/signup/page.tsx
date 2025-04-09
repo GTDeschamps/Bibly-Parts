@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import app from "@/lib/firebaseConfig"; // adapte le chemin selon l’emplacement
+
+const auth = getAuth(app);
 
 const Signup = () => {
   const searchParams = useSearchParams();

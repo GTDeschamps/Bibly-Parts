@@ -1,33 +1,60 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useRef } from 'react';
 import { ShoppingCart, User, Heart, Filter, Search, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { onAuthStateChanged, signOut, getAuth } from 'firebase/auth';
+import { app } from '@/lib/firebaseConfig'; // Assurez-vous d'utiliser votre fichier d'initialisation Firebase
 
 const Header = () => {
   const [isAccountMenuOpen, setAccountMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const userToken = localStorage.getItem('userToken');
-      setIsLoggedIn(!!userToken);
+      const auth = getAuth(app); // On récupère l'auth en utilisant l'app Firebase initialisée
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setIsLoggedIn(true);
+          setUserName(user.displayName || user.email || 'Utilisateur');
+        } else {
+          setIsLoggedIn(false);
+          setUserName('');
+        }
+      });
+
+      // Nettoyage de l'abonnement
+      return () => unsubscribe();
     }
   }, []);
 
+  const handleLogout = () => {
+    const auth = getAuth(app);
+    signOut(auth);
+    setIsLoggedIn(false);
+    setUserName('');
+  };
+
+  // Gérer le clic en dehors du menu (qu'on soit connecté ou pas)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setAccountMenuOpen(false);
+        setAccountMenuOpen(false); // Ferme le menu si le clic est à l'extérieur
       }
     };
+
+    // Ajouter un écouteur d'événements pour détecter les clics extérieurs
     document.addEventListener('mousedown', handleClickOutside);
+
+    // Nettoyage de l'écouteur lors du démontage du composant
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, []); // On l'ajoute une seule fois lors du montage du composant
+
 
   return (
     <header className="fixed top-0 left-0 w-full bg-[#1f3a93] text-white shadow-md p-4 flex items-center justify-between z-50">
@@ -69,10 +96,29 @@ const Header = () => {
         {/* Account Button */}
         <div className="relative flex flex-col items-center" ref={menuRef}>
           {isLoggedIn ? (
-            <Link href="/user" className="flex flex-col items-center hover:text-[#ff6100] transition-transform transform hover:scale-105">
-              <User size={28} className="shadow-md" />
-              <span className="text-sm">Compte</span>
-            </Link>
+            <>
+              <button
+                onClick={() => setAccountMenuOpen(!isAccountMenuOpen)}
+                className="hover:text-[#ff6100] transition-transform transform hover:scale-105"
+              >
+                <User size={28} className="shadow-md" />
+              </button>
+              <span className="text-sm">{userName}</span>
+              {isAccountMenuOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-gray-100 text-black rounded-lg shadow-lg py-2">
+                  <Link href="/user" className="block px-4 py-2 hover:bg-gray-200" onClick={() => setAccountMenuOpen(false)}>Mon compte</Link>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setAccountMenuOpen(false);
+                    }}
+                    className="block px-4 py-2 hover:bg-gray-200 text-left"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <>
               <button

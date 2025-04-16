@@ -2,8 +2,15 @@
 
 import React, { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
-import app from "@/lib/firebaseConfig"; // adapte le chemin selon l’emplacement
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebaseConfig";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import app from "@/lib/firebaseConfig";
 
 const auth = getAuth(app);
 
@@ -12,7 +19,6 @@ const Signup = () => {
   const router = useRouter();
   const isLogin = searchParams?.get("mode") === "login";
 
-  // Champs du formulaire
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,7 +27,6 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const auth = getAuth();
 
     try {
       if (isLogin) {
@@ -36,10 +41,21 @@ const Signup = () => {
         }
 
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-        // Met à jour le nom d'utilisateur dans Firebase
-        await updateProfile(userCredential.user, {
+        // Mise à jour du profil Firebase Auth
+        await updateProfile(user, {
           displayName: username,
+          photoURL: null, // ou une URL par défaut si besoin
+        });
+
+        // Création du document utilisateur dans Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          displayName: username,
+          photoURL: null,
+          createdAt: serverTimestamp(), // Meilleure méthode côté Firestore
         });
 
         router.push("/useraccount");
@@ -51,7 +67,6 @@ const Signup = () => {
 
   return (
     <div className="relative min-h-screen flex justify-center items-center p-8 bg-beige">
-      {/* Image de fond avec transparence */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-20"
         style={{

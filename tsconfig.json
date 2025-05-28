@@ -34,7 +34,7 @@
     ".next/types/**/*.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-  ],
+, "src/lib/FirebaseIntegration.ts"  ],
   "exclude": [
     "node_modules"
   ]

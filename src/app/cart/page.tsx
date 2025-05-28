@@ -3,45 +3,47 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-
-interface Partition {
-	id: number;
-	title: string;
-	author: string;
-	instrument: string;
-	style: string;
-	support: string;
-	booklet: string;
-	price: number;
-}
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, deleteDoc, getFirestore } from "firebase/firestore";
+import { fetchCart } from "@/lib/FirebaseIntegration"; // 🔥 à créer si pas encore fait
 
 const CartPage = () => {
-  const [cart, setCart] = useState<Partition[]>([]);
+  const [cart, setCart] = useState<any[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const db = getFirestore();
 
   useEffect(() => {
-    const storedCart = localStorage.getItem("cart");
-    if (storedCart) {
-      try {
-        const parsedCart = JSON.parse(storedCart);
-        if (Array.isArray(parsedCart)) {
-          setCart(parsedCart);
-        }
-      } catch (error) {
-        console.error("Erreur lors du parsing du panier :", error);
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUserId(user.uid);
+        const items = await fetchCart(user.uid);
+        setCart(items);
+      } else {
+        setCart([]);
       }
-    }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const handleRemoveFromCart = (id: number) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
-    console.log("❌ Retrait du panier :", id);
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  const handleRemoveFromCart = async (id: string) => {
+    if (!userId) return;
+    try {
+      const cartRef = doc(db, `users/${userId}/cart`, id);
+      await deleteDoc(cartRef);
+      setCart((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      console.error("Erreur suppression cart Firestore:", err);
+    }
   };
 
-  const totalPrice = cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
+  const totalPrice = cart.reduce((sum, item) => sum + Number(item.Price || 0), 0);
 
+  if (loading) return <p className="text-center text-blue-800">Chargement du panier...</p>;
 
   return (
     <div className="bg-[#f5f5dc] min-h-screen p-8 relative">
@@ -52,8 +54,10 @@ const CartPage = () => {
             "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')",
         }}
       ></div>
+
       <h1 className="text-xl font-bold text-center mb-6">Mon Panier</h1>
-      <div className="relative border-2 border-blue-600 p-6 rounded-lg shadow-md ">
+
+      <div className="relative border-2 border-blue-600 p-6 rounded-lg shadow-md">
         {cart.length === 0 ? (
           <p className="text-center text-gray-500">Votre panier est vide.</p>
         ) : (
@@ -62,15 +66,14 @@ const CartPage = () => {
               <div key={partition.id} className="flex items-center justify-between border-b pb-2">
                 <div className="flex items-center">
                   <img
-                    alt={partition.title}
+                    src={partition.Cover}
+                    alt={partition.Title}
                     className="w-12 h-12 rounded-md bg-gray-200"
                   />
                   <div className="ml-4">
-                    <h3 className="text-lg font-semibold">{partition.title}</h3>
-                    <p className="text-gray-600">{partition.booklet}</p>
-                    <p className="text-gray-600">
-                      {partition.author} - {partition.support}
-                    </p>
+                    <h3 className="text-lg font-semibold">{partition.Title}</h3>
+                    <p className="text-gray-600">{partition.Booklet}</p>
+                    <p className="text-gray-600">{partition.Artiste} - {partition.Type}</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -80,13 +83,14 @@ const CartPage = () => {
                   >
                     <Trash2 size={20} />
                   </button>
-                  <span className="text-lg font-semibold">{partition.price}€</span>
+                  <span className="text-lg font-semibold">{partition.Price}€</span>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
       {cart.length > 0 && (
         <div className="mt-6 flex justify-end">
           <div className="bg-gray-100 p-4 rounded-lg shadow-md text-right w-64 border border-blue-600">

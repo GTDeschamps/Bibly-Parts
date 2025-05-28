@@ -2,98 +2,75 @@
 
 import React, { useState, useEffect } from "react";
 import Section from "../component/Section";
+import { fetchFavorites } from "@/lib/FirebaseIntegration";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, deleteDoc, getFirestore } from "firebase/firestore";
 
-interface Partition {
-	id: number;
-	title: string;
-	author: string;
-	instrument: string;
-	style: string;
-	support: string;
-	booklet: string;
-	price: number;
-}
 const FavoritesPage: React.FC = () => {
-	const [favorites, setFavorites] = useState<Partition[]>([]);
-	console.log("favoris de la page favoris", favorites);
+	const [favorites, setFavorites] = useState<any[]>([]);
+	const [userId, setUserId] = useState<string | null>(null);
+	const [loading, setLoading] = useState(true);
 
-	// 	// Charger les favoris depuis localStorage si l'utilisateur est connecté
+	const db = getFirestore();
+
 	useEffect(() => {
-		const syncFavorites = () => {
-			const storedFavorites = localStorage.getItem("favorites");
-			if (storedFavorites) {
-				try {
-					const parsedFavorites = JSON.parse(storedFavorites);
-					console.log("Données récupérées depuis localStorage :", parsedFavorites);
-					setFavorites(parsedFavorites.reverse());
-				} catch (error) {
-					console.error("Erreur lors du parsing des favoris :", error);
-					setFavorites([]);
-				}
+		const auth = getAuth();
+		const unsubscribe = onAuthStateChanged(auth, async (user) => {
+			if (user) {
+				setUserId(user.uid);
+				const favs = await fetchFavorites(user.uid);
+				setFavorites(favs.reverse()); // facultatif : pour garder l'ordre
 			} else {
 				setFavorites([]);
 			}
-		};
+			setLoading(false);
+		});
 
-		// 🔥 Exécuter immédiatement
-		syncFavorites();
-
-		// 🔥 Écouter les changements dans localStorage
-		window.addEventListener("storage", syncFavorites);
-
-		return () => {
-			window.removeEventListener("storage", syncFavorites);
-		};
+		return () => unsubscribe();
 	}, []);
 
+	const handleRemoveFromFavorites = async (id: string) => {
+		if (!userId) return;
 
-
-	// 	// Supprimer un favori
-	const handleRemoveFromFavorites = (id: string) => {
-		console.log(`Suppression de l'élément avec ID : ${id}`);
-
-		// Supprimer la partition des favoris
-		const updatedFavorites = favorites.filter((partition) => partition.id !== Number(id));
-
-		// Mettre à jour `localStorage`
-		localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
-
-		// Mettre à jour le state React
-		setFavorites(updatedFavorites);
-
-		// 🔥 Forcer la mise à jour de `Section.tsx`
-		window.dispatchEvent(new Event("storage"));
+		try {
+			const favRef = doc(db, `users/${userId}/favorites`, id);
+			await deleteDoc(favRef);
+			setFavorites(prev => prev.filter(p => p.id !== id));
+			console.log("❌ Favori supprimé");
+		} catch (err) {
+			console.error("Erreur suppression Firestore:", err);
+		}
 	};
-
 
 	return (
 		<div className="bg-[#f5f5dc] min-h-screen p-8">
-			<div className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-20" style={{ backgroundImage: "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')" }}></div>
-			<h1 className="text-xl font-bold text-center mb-6">
-				Mes Partitions Favorites
-			</h1>
+			<div className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-20"
+				style={{ backgroundImage: "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')" }}></div>
+
+			<h1 className="text-xl font-bold text-center mb-6">Mes Partitions Favorites</h1>
+
 			<div className="relative border-2 border-blue-600 p-6 rounded-lg shadow-md">
-				{favorites.length === 0 ? (
-					<p className="text-center text-gray-500">
-						Aucune partition en favoris.
-					</p>
+				{loading ? (
+					<p className="text-center text-blue-800">Chargement...</p>
+				) : favorites.length === 0 ? (
+					<p className="text-center text-gray-500">Aucune partition en favoris.</p>
 				) : (
 					<div className="space-y-4">
-						{favorites.filter((partition) => partition).map((partition) => (
-
-									<Section
-										id={partition.id.toString()}
-										title={partition.title}
-										author={partition.author}
-										instrument={partition.instrument}
-										style={partition.style}
-										support={partition.support}
-										booklet={partition.booklet}
-										price={partition.price}
-										isFavoritePage={true}
-										onUnfavorite={() => handleRemoveFromFavorites(partition.id.toString())}
-									/>
-
+						{favorites.map((item) => (
+								<Section
+									key={item.id}
+									id={item.id}
+									Cover={item.Cover}
+									Title={item.Title}
+									Artiste={item.Artiste}
+									Instrument={item.Instrument}
+									Style={item.Style}
+									Type={item.Type}
+									Booklet={item.Booklet}
+									Price={item.Price}
+									isFavoritePage={true}
+									onUnfavorite={() => handleRemoveFromFavorites(item.id)}
+								/>
 						))}
 					</div>
 				)}

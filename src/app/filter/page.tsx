@@ -1,65 +1,64 @@
-// Code: Filtres de recherche
 "use client";
+
 import { useState, useEffect } from "react";
-import { Play, Info, Heart, ShoppingCart, FileText, Search, Menu } from "lucide-react";
-import Section from "../component/Section";  // Importer votre composant Section
+import { Search } from "lucide-react";
+import Section from "../component/Section";
+import { fetchPartitions } from "@/lib/FirebaseIntegration";
 
-
-const styles = ["Rock", "Rap", "Classique", "Metal","Jazz","Blues","Ragtime","New Age","Folk", "Pop", "Variété française", "Variété internationale"];
-const instruments = ["Batterie", "Guitare", "Violon", "Flûte", "Trompette", "Piano", "Orchestre", "Chorale", "Harpe", "Saxophone", "Clarinette", "Accordéon", "Orgue", "Synthétiseur", "Basse","Violoncelle"];
+const styles = ["Rock", "Rap", "Classique", "Metal", "Jazz", "Blues", "Ragtime", "New Age", "Folk", "Pop", "Variété française", "Variété internationale"];
+const instruments = ["Batterie", "Guitare", "Violon", "Flûte", "Trompette", "Piano", "Orchestre", "Chorale", "Harpe", "Saxophone", "Clarinette", "Accordéon", "Orgue", "Synthétiseur", "Basse", "Violoncelle"];
 const supports = ["partition", "tablature"];
 
 const FilterPage = () => {
-	const [style, setStyle] = useState("");
-	const [instrument, setInstrument] = useState("");
-	const [support, setSupport] = useState("");
-	const [keyword, setKeyword] = useState("");
-	const [partitions, setPartitions] = useState([]); // Stocke toutes les partitions
-	const [filteredResults, setFilteredResults] = useState([]); // Stocke les résultats filtrés
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState(null);
-	const [isMenuOpen, setIsMenuOpen] = useState(false); // Pour gérer le menu burger
+  const [style, setStyle] = useState("");
+  const [instrument, setInstrument] = useState("");
+  const [support, setSupport] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [partitions, setPartitions] = useState<any[]>([]);
+  const [filteredResults, setFilteredResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
- // Charger les partitions depuis le fichier JSON
- useEffect(() => {
-    const fetchPartitions = async () => {
+  // 🔄 Charger depuis Firestore
+  useEffect(() => {
+    const loadPartitions = async () => {
       try {
-        const response = await fetch("/PartitionData.json");
-        if (!response.ok) throw new Error("Erreur lors du chargement des partitions");
-        const data = await response.json();
-        setPartitions(data); // Stocke toutes les partitions
-        setFilteredResults(data); // Initialise avec toutes les partitions
+        const data = await fetchPartitions();
+        setPartitions(data);
+        setFilteredResults(data);
       } catch (err: any) {
-        setError(err.message);
+        console.error("Erreur de chargement Firestore:", err);
+        setError(err.message || "Erreur lors du chargement des partitions");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPartitions();
+    loadPartitions();
   }, []);
 
-  // Appliquer les filtres et la recherche
+  // 🔎 Appliquer les filtres
   useEffect(() => {
     let results = partitions;
 
     if (style) {
-      results = results.filter((p: any) => p.style.toLowerCase() === style.toLowerCase());
+      results = results.filter((p) => p.Style?.toLowerCase() === style.toLowerCase());
     }
 
     if (instrument) {
-      results = results.filter((p: any) => p.instrument.toLowerCase() === instrument.toLowerCase());
+      results = results.filter((p) => p.Instrument?.toLowerCase() === instrument.toLowerCase());
     }
 
     if (support) {
-      results = results.filter((p: any) => p.support.toLowerCase() === support.toLowerCase());
+      results = results.filter((p) => p.Type?.toLowerCase() === support.toLowerCase());
     }
 
     if (keyword) {
-      results = results.filter((p: any) =>
-        p.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        p.author.toLowerCase().includes(keyword.toLowerCase()) ||
-        p.album.toLowerCase().includes(keyword.toLowerCase())
+      const kw = keyword.toLowerCase();
+      results = results.filter((p) =>
+        p.Title?.toLowerCase().includes(kw) ||
+        p.Artiste?.toLowerCase().includes(kw) ||
+        p.Booklet?.toLowerCase().includes(kw)
       );
     }
 
@@ -69,86 +68,66 @@ const FilterPage = () => {
   if (loading) return <p className="text-center text-blue-900">Chargement...</p>;
   if (error) return <p className="text-center text-red-600">Erreur : {error}</p>;
 
+  return (
+    <div className="bg-[#f5f5dc] min-h-screen py-10 px-4 md:px-12 relative max-h-screen overflow-y-auto">
+      {/* Filigrane */}
+      <div className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-20"
+        style={{ backgroundImage: "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')" }}></div>
 
-	return (
-		<div className="bg-[#f5f5dc] min-h-screen py-10 px-4 md:px-12 relative max-h-screen overflow-y-auto">
-			{/* Filigrane d'image */}
-			<div
-					className="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none"
-					style={{
-						backgroundImage:
-							"url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')",
-					}}
-				></div>
-			<div className="absolute inset-0 bg-no-repeat bg-center bg-contain opacity-20" style={{ backgroundImage: "url('../media/png-clipart-musical-notes-illustration-musical-note-sheet-music-music-therapy-music-notes-miscellaneous-angle-removebg-preview.png')" }}></div>
+      <div className="relative p-6">
+        {/* Filtres */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <select className="w-full p-3 border-2 border-blue-600 bg-gray-200 rounded-lg outline-none" value={style} onChange={(e) => setStyle(e.target.value)}>
+            <option value="">Style</option>
+            {styles.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
 
-			<div className="relative p-6">
-				<div className="flex items-center justify-between mb-4 md:hidden">
+          <select className="w-full p-3 border-2 border-blue-600 bg-gray-200 rounded-lg outline-none" value={instrument} onChange={(e) => setInstrument(e.target.value)}>
+            <option value="">Instrument</option>
+            {instruments.map((i) => <option key={i} value={i}>{i}</option>)}
+          </select>
 
-				</div>
+          <select className="w-full p-3 border-2 border-blue-600 bg-gray-200 rounded-lg outline-none" value={support} onChange={(e) => setSupport(e.target.value)}>
+            <option value="">Support</option>
+            {supports.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
 
-				{/* Contenu des filtres */}
-				<div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-					<div className="relative border-2 border-blue-600 bg-gray-200 rounded-lg">
-						<select className="w-full p-3 bg-gray-200 outline-none" value={style} onChange={(e) => setStyle(e.target.value)}>
-							<option value="">Style</option>
-							{styles.map((s) => (
-								<option key={s} value={s}>{s}</option>
-							))}
-						</select>
-					</div>
+          <div className="relative flex items-center border-2 border-blue-600 bg-gray-200 rounded-lg">
+            <Search size={18} className="ml-2 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Auteur / Compositeur / Livret / Titre"
+              className="w-full p-2 outline-none bg-gray-200"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+          </div>
+        </div>
 
-					<div className="relative border-2 border-blue-600 bg-gray-200 rounded-lg">
-						<select className="w-full p-3 bg-gray-200 outline-none" value={instrument} onChange={(e) => setInstrument(e.target.value)}>
-							<option value="">Instrument</option>
-							{instruments.map((i) => (
-								<option key={i} value={i}>{i}</option>
-							))}
-						</select>
-					</div>
+        {/* Résultats */}
+        <div className="mt-4 p-4 border-2 border-blue-600 rounded-lg">
+          {filteredResults.length > 0 ? (
+            filteredResults.map((item) => (
+              <Section
+                key={item.id}
+                id={item.id}
+                Title={item.Title}
+                Artiste={item.Artiste}
+                Instrument={item.Instrument}
+                Style={item.Style}
+                Type={item.Type}
+                Booklet={item.Booklet}
+                Price={item.Price}
+                Cover={item.CoverImage}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">Aucun résultat trouvé</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-					<div className="relative border-2 border-blue-600 bg-gray-200 rounded-lg">
-						<select className="w-full p-3 bg-gray-200 outline-none" value={support} onChange={(e) => setSupport(e.target.value)}>
-							<option value="">Support</option>
-							{supports.map((s) => (
-								<option key={s} value={s}>{s}</option>
-							))}
-						</select>
-					</div>
-
-					<div className="relative flex items-center border-2 border-blue-600 bg-gray-200 rounded-lg">
-						<Search size={18} className="ml-2 text-gray-500" />
-						<input
-							type="text"
-							placeholder="Auteur / Compositeur / Livret / Titre"
-							className="w-full p-2 outline-none bg-gray-200"
-							value={keyword}
-							onChange={(e) => setKeyword(e.target.value)}
-						/>
-					</div>
-				</div>
-
-				{/* Résultats */}
-				<div className= "mt-4 p-4 border-2 border-blue-600 rounded-lg">
-					{filteredResults.length > 0 ? (
-						filteredResults.map((item, index) => (
-							<Section key={item.id}
-							id={item.id}  // <- L'ID doit être passé ici
-							title={item.title}
-							author={item.author}
-							instrument={item.instrument}
-							style={item.style}
-							support={item.support}
-							booklet={item.booklet}
-							price={item.price}/>
-						))
-					) : (
-						<p className="text-gray-500">Aucun résultat trouvé</p>
-					)}
-				</div>
-			</div>
-		</div>
-	);
-}
-
-	export default FilterPage;
+export default FilterPage;

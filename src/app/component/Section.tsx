@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
 import { getFirestore, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
@@ -22,7 +23,7 @@ interface SectionProps {
   Type: string;
   Booklet: string;
   Price: number;
-  Cover: string; // ✅ Correction ici : Cover est une URL (string)
+  Cover: string;
   isFavoritePage?: boolean;
   onUnfavorite?: () => void;
   onUnCart?: () => void;
@@ -37,24 +38,8 @@ interface Partition {
   Type: string;
   Booklet: string;
   Price: number;
-  Cover: string; // ✅ Idem ici
+  Cover: string;
 }
-
-// 🔧 Fonction pour convertir un lien Google Drive en URL affichable
-const convertDriveLink = (link: string | undefined): string => {
-  if (!link || typeof link !== 'string' || !link.includes('/d/')) {
-    // URL par défaut si lien invalide
-    return '/default-cover.jpg'; // à placer dans /public/
-  }
-
-  const match = link.match(/\/d\/([-\w]{25,})/);
-  const fileId = match ? match[1] : null;
-
-  return fileId
-    ? `https://drive.google.com/uc?export=view&id=${fileId}`
-    : '/default-cover.jpg';
-};
-
 
 
 const Section = ({
@@ -137,21 +122,22 @@ const Section = ({
   return (
     <div className="border-b last:border-none py-4 flex justify-between items-center">
       {/* ✅ Image de couverture */}
-      <div className="flex items-center space-x-4">
-        {cover && (
-          <img
-            src={convertDriveLink(partitionData.Cover)}
-            alt={`Couverture de ${title}`}
-            className="w-16 h-16 rounded-md bg-gray-200 object-cover"
-          />
-        )}
-        <div>
-          <p className="text-lg font-semibold">{title}</p>
-          <p className="text-gray-600">
-            {artiste} - {type}
-          </p>
-        </div>
-      </div>
+      <Link href={`/description/${id}`} className="flex items-center space-x-4 hover:bg-blue-100 p-2 rounded-lg transition">
+  {cover && (
+    <img
+      src={cover}
+      alt={`Couverture de ${title}`}
+      className="w-16 h-16 rounded-md bg-gray-200 object-cover"
+    />
+  )}
+  <div>
+    <p className="text-lg font-semibold">{title}</p>
+    <p className="text-gray-600">
+      {artiste} - {type}
+    </p>
+  </div>
+</Link>
+
 
       <button onClick={() => setOpen(!open)} className="md:hidden">
         <MenuIcon size={20} />

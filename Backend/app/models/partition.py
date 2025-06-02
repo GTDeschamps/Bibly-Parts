@@ -5,6 +5,7 @@ class Partition(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120))
     artiste = db.Column(db.String(100))
+    description = db.Column(db.Text)
     booklet = db.Column(db.String(120))
     style = db.Column(db.String(80))
     instrument = db.Column(db.String(80))

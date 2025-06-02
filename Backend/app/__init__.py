@@ -36,6 +36,7 @@ def create_app():
     from app.routes.cart import cart_ns
     from app.routes.orders import orders_ns
     from app.routes.filter import filter_ns
+    from app.routes.description import description_ns
 
     api.add_namespace(auth_ns, path="/api/auth")
     api.add_namespace(partitions_ns, path="/api/partitions")
@@ -44,5 +45,6 @@ def create_app():
     api.add_namespace(cart_ns, path="/api/cart")
     api.add_namespace(orders_ns, path="/api/orders")
     api.add_namespace(filter_ns, path="/api/filter")
+    api.add_namespace(description_ns, path="/api/description")
 
     return app

@@ -7,7 +7,7 @@ partitions_ns = Namespace('partitions', description="Gestion des partitions")
 partition_model = partitions_ns.model('Partition', {
     'id': fields.Integer(readOnly=True),
     'title': fields.String(required=True),
-    'author': fields.String,
+    'artiste': fields.String,
     'description': fields.String,
     'booklet': fields.String,
     'style': fields.String,
@@ -33,7 +33,7 @@ class PartitionList(Resource):
         data = partitions_ns.payload
         new_partition = Partition(
             title=data['title'],
-            author=data.get('author'),
+            artiste=data.get('artiste'),
             description=data.get('description'),
             booklet=data.get('booklet'),
             style=data.get('style'),

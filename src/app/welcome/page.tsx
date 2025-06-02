@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Section from "../component/Section";
-import { fetchPartitions } from "@/lib/FirebaseIntegration";
 
 const getRandomItems = (array: any[], n: number) => {
 	const shuffled = [...array].sort(() => 0.5 - Math.random());
@@ -16,14 +15,31 @@ const WelcomePage = () => {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const loadPartitionsFromFirebase = async () => {
+		const loadPartitionsFromAPI = async () => {
 			try {
-				const data = await fetchPartitions();
-				console.log("📦 DONNÉES RECUES DE FIRESTORE :", data);
+				const response = await fetch("http://localhost:5000/api/partitions");
+				const data = await response.json();
+				console.log("📦 DONNÉES RECUES DE FLASK :", data);
 
-				// Correction MAJUSCULE pour Type
-				const partitionList = data.filter((p: any) => p.Type?.toLowerCase() === "partition");
-				const tablatureList = data.filter((p: any) => p.Type?.toLowerCase() === "tablature");
+				const getValidImage = (url: string) =>
+					url && url.startsWith("http") ? url : "/logo.png";
+
+
+				const normalized = data.map((p: any) => ({
+					id: p.id,
+					Title: p.title,
+					Artiste: p.artiste,
+					Instrument: p.instrument,
+					Style: p.style,
+					Type: p.type,
+					Booklet: p.booklet,
+					Price: p.price,
+					CoverImage: getValidImage(p.cover_image)
+,
+				}));
+
+				const partitionList = normalized.filter((p) => p.Type?.toLowerCase() === "partition");
+				const tablatureList = normalized.filter((p) => p.Type?.toLowerCase() === "tablature");
 
 				console.log("🎯 Partitions filtrées :", partitionList);
 				console.log("🎯 Tablatures filtrées :", tablatureList);
@@ -38,7 +54,7 @@ const WelcomePage = () => {
 			}
 		};
 
-		loadPartitionsFromFirebase();
+		loadPartitionsFromAPI();
 	}, []);
 
 	if (loading) return <p className="text-center text-blue-900">Chargement...</p>;
@@ -84,7 +100,7 @@ const WelcomePage = () => {
 							key={item.id}
 							id={item.id}
 							Title={item.Title}
-							Artiste={item.Artiste}   // 🔥 pas Author !!
+							Artiste={item.Artiste}
 							Instrument={item.Instrument}
 							Style={item.Style}
 							Type={item.Type}

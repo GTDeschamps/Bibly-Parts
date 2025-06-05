@@ -1,22 +1,31 @@
 import bcrypt
 import jwt
 import datetime
-from flask import request, jsonify
+from flask import request
 from functools import wraps
 
-SECRET_KEY = "ton_secret_super_secure"  # Mieux : charger depuis .env
+from app.models.user import User  # ✅ Assure-toi que le chemin est correct
 
-# Hasher un mot de passe
+# 🔐 Clé secrète à sécuriser en prod via un .env
+SECRET_KEY = "Admin"
+
+# ✅ Hachage d'un mot de passe
+
+
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed.decode('utf-8')
+    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed.decode("utf-8")
 
-# Vérifier un mot de passe
+# ✅ Vérification d'un mot de passe
+
+
 def verify_password(password: str, hashed: str) -> bool:
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
-# Créer un token JWT
+# ✅ Création d'un token JWT
+
+
 def create_token(user_id):
     payload = {
         "user_id": user_id,
@@ -26,36 +35,51 @@ def create_token(user_id):
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
 
-# Décoder un token JWT
+# ✅ Décodage du token JWT
+
+
 def decode_token(token):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        print("Payload décodé :", payload)
         return payload["user_id"]
     except jwt.ExpiredSignatureError:
-        return None  # Token expiré
+        return None
     except jwt.InvalidTokenError:
-        return None  # Token invalide
+        return None
 
-# Decorator pour protéger les routes
+# ✅ Décorateur pour protéger les routes avec injection de l'objet `User`
+
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
 
-        # Le token peut venir dans les headers Authorization : Bearer <token>
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            if auth_header and auth_header.startswith('Bearer '):
-                token = auth_header.split(' ')[1]
+        # Extraction du token depuis le header Authorization
+        if "Authorization" in request.headers:
+            auth_header = request.headers["Authorization"]
+            if auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
 
         if not token:
-            return jsonify({"message": "Token is missing!"}), 401
+            return ({"message": "Token manquant"}), 401
 
         user_id = decode_token(token)
         if not user_id:
-            return jsonify({"message": "Token is invalid or expired!"}), 401
+            return ({"message": "Token invalide ou expiré"}), 401
 
-        # On peut aussi passer user_id à la fonction protégée via kwargs
-        return f(user_id, *args, **kwargs)
+        # Récupération de l'objet User
+        user = User.query.get(user_id)
+        if user:
+            print("Utilisateur email:", user.email)
+        else:
+            print("Utilisateur introuvable")
+        if not user:
+            return ({"message": "Utilisateur introuvable"}), 404
+
+# Injecte 'user' dans kwargs proprement
+        kwargs['user'] = user
+        return f(*args, **kwargs)
 
     return decorated

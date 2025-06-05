@@ -3,8 +3,10 @@ from app.extensions import db
 from app.models.user import User
 from app.utils.security import token_required, hash_password
 
+# ✅ D'abord on crée le namespace
 user_ns = Namespace('user', description="Gestion du profil utilisateur")
 
+# ✅ Ensuite on définit les modèles
 user_model = user_ns.model('User', {
     'id': fields.Integer(readOnly=True),
     'email': fields.String,
@@ -17,20 +19,22 @@ user_update_model = user_ns.model('UserUpdate', {
     'password': fields.String(description="Nouveau mot de passe (optionnel)")
 })
 
+# ✅ Puis on déclare la route
 @user_ns.route('/me')
 class UserProfile(Resource):
     @token_required
-    @user_ns.marshal_with(user_model)
-    def get(self, user_id):
-        """Récupère les infos de l'utilisateur connecté"""
-        user = User.query.get_or_404(user_id)
-        return user
-
+    # @user_ns.marshal_with(user_model)
+    def get(self, user):
+        return {
+            "id": user.id,
+            "email": user.email,
+            "username": user.username
+        }, 200
+        
     @token_required
     @user_ns.expect(user_update_model)
-    def put(self, user_id):
+    def put(self, user):
         """Met à jour les infos de l'utilisateur connecté"""
-        user = User.query.get_or_404(user_id)
         data = user_ns.payload
 
         if 'email' in data:
@@ -44,9 +48,8 @@ class UserProfile(Resource):
         return {"message": "Profil mis à jour"}
 
     @token_required
-    def delete(self, user_id):
+    def delete(self, user):
         """Supprime le compte utilisateur"""
-        user = User.query.get_or_404(user_id)
         db.session.delete(user)
         db.session.commit()
         return {"message": "Compte supprimé"}, 204

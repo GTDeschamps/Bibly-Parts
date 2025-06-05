@@ -30,7 +30,7 @@ const Signup = () => {
 				const data = await res.json();
 				if (!res.ok) throw new Error(data.message || "Erreur de connexion");
 
-				setToken(data.access_token); // JWT
+				setToken(data.token || data.access_token); // JWT
 				router.push("/useraccount");
 
 			} else {
@@ -48,7 +48,7 @@ const Signup = () => {
 				const data = await res.json();
 				if (!res.ok) throw new Error(data.message || "Erreur lors de l'inscription");
 
-				setToken(data.access_token); // JWT
+				setToken(data.token || data.access_token); // JWT
 				router.push("/useraccount");
 			}
 		} catch (err: any) {

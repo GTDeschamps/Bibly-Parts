@@ -11,6 +11,7 @@ const FavoritesPage: React.FC = () => {
 	const fetchFavorites = async () => {
 		try {
 			const token = localStorage.getItem("token");
+			console.log("Token:", token);
 			if (!token) throw new Error("Utilisateur non authentifié");
 
 			const res = await fetch("http://localhost:5000/api/favorites", {

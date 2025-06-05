@@ -12,11 +12,18 @@ api = Api(
     doc="/docs"  # Swagger UI
 )
 
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
-    CORS(app)
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": "*"}},  # ou restreint à http://localhost:3000
+        expose_headers=["Authorization"],
+        supports_credentials=True  # utile si tu veux plus tard envoyer des cookies sécurisés
+    )
+
     db.init_app(app)
     migrate.init_app(app, db)
 

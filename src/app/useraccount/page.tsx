@@ -18,11 +18,19 @@ const UserAccountPage = () => {
 
 	const router = useRouter();
 
-	// 🔐 Chargement des infos utilisateur depuis l’API
+	const token = getToken();
+	console.log("Token utilisé pour fetch :", token);
+
+
+	// 🔐 Chargement des infos utilisateur
 	useEffect(() => {
 		const fetchUserData = async () => {
 			const token = getToken();
-			if (!token) return router.push("/signup?mode=login");
+
+			if (!token) {
+				console.warn("Aucun token trouvé, redirection...");
+				return router.push("/signup?mode=login");
+			}
 
 			try {
 				const res = await fetch("http://localhost:5000/api/user/me", {
@@ -31,23 +39,28 @@ const UserAccountPage = () => {
 					},
 				});
 
-				if (!res.ok) throw new Error("Utilisateur non connecté");
+				if (!res.ok) {
+					throw new Error(`Erreur API: ${res.status}`);
+				}
+
 				const data = await res.json();
+
 				setUserData(data);
-				setNewDisplayName(data.username);
-				setNewEmail(data.email);
+				setNewDisplayName(data.username || "");
+				setNewEmail(data.email || "");
 			} catch (err: any) {
-				console.error(err);
+				console.error("Erreur lors de la récupération de l'utilisateur:", err.message);
 				clearToken();
 				router.push("/signup?mode=login");
 			}
 		};
 
 		fetchUserData();
-	}, []);
+	}, [router]);
 
 	const handleUsernameChange = async () => {
 		if (!newDisplayName) return;
+
 		try {
 			const res = await fetch("http://localhost:5000/api/user/me", {
 				method: "PUT",
@@ -57,7 +70,8 @@ const UserAccountPage = () => {
 				},
 				body: JSON.stringify({ username: newDisplayName }),
 			});
-			if (!res.ok) throw new Error("Échec de mise à jour");
+
+			if (!res.ok) throw new Error("Échec de mise à jour du nom");
 
 			setSuccess("Nom d'utilisateur mis à jour !");
 			setUserData((prev: any) => ({ ...prev, username: newDisplayName }));
@@ -78,6 +92,7 @@ const UserAccountPage = () => {
 				},
 				body: JSON.stringify({ email: newEmail }),
 			});
+
 			if (!res.ok) throw new Error("Erreur lors de la mise à jour de l'e-mail");
 
 			setSuccess("Adresse email mise à jour !");
@@ -101,6 +116,7 @@ const UserAccountPage = () => {
 				},
 				body: JSON.stringify({ password: newPassword }),
 			});
+
 			if (!res.ok) throw new Error("Erreur de mise à jour du mot de passe");
 
 			setSuccess("Mot de passe mis à jour !");
@@ -125,8 +141,9 @@ const UserAccountPage = () => {
 				method: "POST",
 				body: formData,
 			});
+
 			const data = await res.json();
-			if (!data.secure_url) throw new Error("Échec upload");
+			if (!data.secure_url) throw new Error("Échec de l'upload");
 
 			const updateRes = await fetch("http://localhost:5000/api/user/me", {
 				method: "PUT",
@@ -136,19 +153,20 @@ const UserAccountPage = () => {
 				},
 				body: JSON.stringify({ photoURL: data.secure_url }),
 			});
-			if (!updateRes.ok) throw new Error("Échec mise à jour profil");
+
+			if (!updateRes.ok) throw new Error("Échec mise à jour de la photo");
 
 			setUserData((prev: any) => ({ ...prev, photoURL: data.secure_url }));
 			setSuccess("Image de profil mise à jour !");
 		} catch (err: any) {
-			setError("Erreur de l'upload d'image.");
+			setError("Erreur lors de l'upload de l'image.");
 		} finally {
 			setUploading(false);
 		}
 	};
 
 	if (!userData) {
-		return <div className="text-center mt-10 text-xl">Chargement...</div>;
+		return <div className="text-center mt-10 text-xl">Chargement des données...</div>;
 	}
 
 	return (
@@ -162,18 +180,14 @@ const UserAccountPage = () => {
 				/>
 				<label className="mt-2 text-blue-700 hover:text-orange-500 cursor-pointer">
 					Modifier la photo
-					<input
-						type="file"
-						accept="image/*"
-						className="hidden"
-						onChange={handleImageUpload}
-					/>
+					<input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
 				</label>
 				{uploading && <p className="text-sm text-gray-500 mt-1">Upload en cours...</p>}
 			</div>
 
 			{/* INFOS UTILISATEUR */}
 			<div className="space-y-6 w-full max-w-xl">
+				{/* Nom */}
 				<div className="space-y-2">
 					<label className="block font-semibold">Nom d'utilisateur</label>
 					<input
@@ -190,6 +204,7 @@ const UserAccountPage = () => {
 					</button>
 				</div>
 
+				{/* Email */}
 				<div className="space-y-2">
 					<label className="block font-semibold">Changer l'adresse email</label>
 					<input
@@ -202,10 +217,11 @@ const UserAccountPage = () => {
 						onClick={handleEmailChange}
 						className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-orange-500"
 					>
-						Modifier l’email
+						Modifier l’e-mail
 					</button>
 				</div>
 
+				{/* Password */}
 				<div className="space-y-2">
 					<label className="block font-semibold">Changer le mot de passe</label>
 					<input
@@ -234,6 +250,7 @@ const UserAccountPage = () => {
 				{error && <p className="text-red-600 text-sm">{error}</p>}
 			</div>
 
+			{/* Liens */}
 			<div className="flex justify-center gap-6 pt-8">
 				<Link href="/favorites" className="flex flex-col items-center hover:text-[#ff6100]">
 					<Heart size={28} />

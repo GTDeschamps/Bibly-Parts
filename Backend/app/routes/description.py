@@ -13,4 +13,13 @@ class DescriptionResource(Resource):
             "id": partition.id,
             "title": partition.title,
             "description": partition.description,
+            "PdfFile": partition.pdf_file,
+            "cover_image": partition.cover_image,
+            "price": partition.price,
+            "artiste": partition.artiste,
+            "instrument": partition.instrument,
+            "type": partition.type,
+            "style": partition.style,
+            "booklet": partition.booklet,
+            "AudioFile": partition.AudioFile,
         }

@@ -1,15 +1,19 @@
 from flask import Flask, redirect
 from flask_cors import CORS
 from flask_restx import Api
+from flask_jwt_extended import JWTManager  # 🔒 Ajout JWT
 
 from app.extensions import db, migrate
 
-# Création de l'objet Flask-RESTX
+# Initialisation du gestionnaire JWT
+jwt = JWTManager()
+
+# Création de l'objet Flask-RESTX (Swagger)
 api = Api(
     title="BiblyParts API",
     version="1.0",
     description="API pour partitions, utilisateurs, favoris, etc.",
-    doc="/docs"  # Swagger UI
+    doc="/docs"
 )
 
 
@@ -17,25 +21,50 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object("config.Config")
 
+    # Configuration minimale pour JWT
+    app.config["JWT_SECRET_KEY"] = "change-this-in-production"  # 🔐 Change-la en prod !
+    jwt.init_app(app)
+
+    # Custom JWT error handlers
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return {"message": "Le token a expiré.", "error": "token_expired"}, 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        return {"message": "Signature invalide.", "error": "invalid_token"}, 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        return {"message": "Le token est manquant.", "error": "authorization_required"}, 401
+
+    # Configuration CORS
     CORS(
         app,
-        resources={r"/api/*": {"origins": "*"}},  # ou restreint à http://localhost:3000
+        resources={r"/api/*": {"origins": "*"}},  # Ou "http://localhost:3000" si Next.js
         expose_headers=["Authorization"],
-        supports_credentials=True  # utile si tu veux plus tard envoyer des cookies sécurisés
+        supports_credentials=True
     )
 
+    # Initialisation des extensions
     db.init_app(app)
     migrate.init_app(app, db)
-
-    # Initialisation de l'API avec l'application Flask
     api.init_app(app)
 
-    # Route d’accueil qui redirige vers /docs
+    # Global error handler for the API
+    @api.errorhandler(Exception)
+    def handle_all_exceptions(error):
+        """Catches all unhandled exceptions and returns a JSON response."""
+        # You can log the error here for debugging
+        # import traceback
+        # traceback.print_exc()
+        return {'message': f'Internal Server Error: {error}'}, 500
+
     @app.route("/")
     def index():
         return redirect("/docs")
 
-    # Importation et ajout des namespaces
+    # Importation et ajout des namespaces API
     from app.routes.auth import auth_ns
     from app.routes.partitions import partitions_ns
     from app.routes.favorites import favorites_ns

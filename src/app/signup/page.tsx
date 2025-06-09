@@ -31,6 +31,7 @@ const Signup = () => {
 				if (!res.ok) throw new Error(data.message || "Erreur de connexion");
 
 				setToken(data.token || data.access_token); // JWT
+				            localStorage.setItem("user", JSON.stringify(data.user));
 				router.push("/useraccount");
 
 			} else {

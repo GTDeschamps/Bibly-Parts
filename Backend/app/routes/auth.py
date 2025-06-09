@@ -1,7 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from app.extensions import db
 from app.models.user import User
-from app.utils.security import hash_password, verify_password, create_token
+from app.utils.security import hash_password, verify_password
+from flask_jwt_extended import create_access_token
 
 auth_ns = Namespace('auth', description="Opérations d'authentification")
 
@@ -30,6 +31,7 @@ class Register(Resource):
         db.session.commit()
         return {"message": "Utilisateur créé avec succès"}, 201
 
+
 @auth_ns.route('/login')
 class Login(Resource):
     @auth_ns.expect(login_model)
@@ -39,5 +41,15 @@ class Login(Resource):
         if not user or not verify_password(data['password'], user.password_hash):
             return {"message": "Identifiants invalides"}, 401
 
-        token = create_token(user.id)
-        return {"token": token}, 200
+        # ✅ Création d’un token JWT avec l'identité = user.id
+        token = create_access_token(identity=user.id)
+
+        return {
+            "token": token,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "profile_image": user.profile_image
+            }
+        }, 200

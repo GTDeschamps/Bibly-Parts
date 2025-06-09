@@ -17,7 +17,7 @@ const CartPage = () => {
 				const token = getToken();
 				if (!token) throw new Error("Utilisateur non connecté");
 
-				const res = await fetch("http://localhost:5000/api/cart", {
+				const res = await fetch("http://localhost:5000/api/cart/", {
 					headers: {
 						Authorization: `Bearer ${token}`,
 					},
@@ -79,7 +79,7 @@ const CartPage = () => {
 							<div key={partition.id} className="flex items-center justify-between border-b pb-2">
 								<div className="flex items-center">
 									<img
-										src={partition.CoverImage}
+										src={partition.cover_image_url}
 										alt={partition.Title}
 										className="w-12 h-12 rounded-md bg-gray-200"
 									/>

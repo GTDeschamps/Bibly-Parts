@@ -14,7 +14,7 @@ const FavoritesPage: React.FC = () => {
 			console.log("Token:", token);
 			if (!token) throw new Error("Utilisateur non authentifié");
 
-			const res = await fetch("http://localhost:5000/api/favorites", {
+			const res = await fetch("http://localhost:5000/api/favorites/", {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
@@ -23,6 +23,7 @@ const FavoritesPage: React.FC = () => {
 			if (!res.ok) throw new Error("Échec du chargement des favoris");
 
 			const data = await res.json();
+			console.log("Données favorites :", data);
 			setFavorites(data.reverse());
 		} catch (err: any) {
 			console.error("❌ Erreur chargement favoris :", err.message);
@@ -80,18 +81,18 @@ const FavoritesPage: React.FC = () => {
 					<div className="space-y-4">
 						{favorites.map((item) => (
 							<Section
-								key={item.id}
-								id={item.id}
-								Cover={item.CoverImage}
-								Title={item.Title}
-								Artiste={item.Artiste}
-								Instrument={item.Instrument}
-								Style={item.Style}
-								Type={item.Type}
-								Booklet={item.Booklet}
-								Price={item.Price}
-								isFavoritePage={true}
-								onUnfavorite={() => handleRemoveFromFavorites(item.id)}
+								key={item.favorite_id}
+    id={item.partition_id} // pour la suppression par partition_id
+    Cover={item.cover_image}
+    Title={item.title}
+    Artiste={item.artist}
+    Instrument={item.instrument}
+    Style={item.style}
+    Type={item.type}
+    Booklet={item.booklet}
+    Price={item.price}
+    isFavoritePage={true}
+    onUnfavorite={() => handleRemoveFromFavorites(item.partition_id)}
 							/>
 						))}
 					</div>

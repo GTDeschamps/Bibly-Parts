@@ -1,8 +1,9 @@
 from flask_restx import Namespace, Resource, fields
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.favorite import Favorite
 from app.models.partition import Partition
-from app.utils.security import token_required
+from app.models.user import User  # Assure-toi que ce modèle existe
 
 favorites_ns = Namespace('favorites', description="Gestion des favoris")
 
@@ -13,30 +14,70 @@ favorite_model = favorites_ns.model('Favorite', {
 
 @favorites_ns.route('/')
 class FavoriteList(Resource):
-    @token_required
-    @favorites_ns.marshal_list_with(favorite_model)
-    def get(self, user_id):
-        """Liste les favoris d'un utilisateur"""
-        return Favorite.query.filter_by(user_id=user_id).all()
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        if not user:
+            return {"message": "Utilisateur non trouvé"}, 401
 
-    @token_required
+        favorites = Favorite.query.filter_by(user_id=user.id).all()
+        result = []
+        for fav in favorites:
+            partition = Partition.query.get(fav.partition_id)
+            if partition:
+                result.append({
+                    'favorite_id': fav.id,
+                    'partition_id': partition.id,
+                    'title': partition.title,
+                    'artist': getattr(partition, 'artist', 'Inconnu'),  # adapte selon champ réel
+                    'cover_image': getattr(partition, 'cover_image', None),
+                    # ajoute ici d'autres champs utiles que tu souhaites envoyer
+                })
+        return result, 200
+
+    @jwt_required()
     @favorites_ns.expect(favorite_model)
-    def post(self, user_id):
-        """Ajoute un favori"""
-        data = favorites_ns.payload
-        fav = Favorite(user_id=user_id, partition_id=data['partition_id'])
-        db.session.add(fav)
-        db.session.commit()
-        return {"message": "Ajouté aux favoris"}, 201
+    def post(self):
+        try:
+            user_id = get_jwt_identity()
+            user = User.query.get(user_id)
+            if not user:
+                return {"message": "Utilisateur non trouvé"}, 401
+
+            data = favorites_ns.payload
+            partition_id = data['partition_id']
+
+            partition = Partition.query.get(partition_id)
+            if not partition:
+                return {"message": "Partition non trouvée."}, 404
+
+            existing_fav = Favorite.query.filter_by(user_id=user.id, partition_id=partition_id).first()
+            if existing_fav:
+                return {"message": "Cette partition est déjà dans vos favoris."}, 409
+
+            fav = Favorite(user_id=user.id, partition_id=partition_id)
+            db.session.add(fav)
+            db.session.commit()
+
+            return {"message": "Ajouté aux favoris"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"Erreur interne du serveur: {e}"}, 500
 
 @favorites_ns.route('/<int:partition_id>')
 class FavoriteDelete(Resource):
-    @token_required
-    def delete(self, user_id, partition_id):
-        """Supprime un favori"""
-        fav = Favorite.query.filter_by(user_id=user_id, partition_id=partition_id).first()
+    @jwt_required()
+    def delete(self, partition_id):
+        user_id = get_jwt_identity()
+        user = User.query.get(user_id)
+        if not user:
+            return {"message": "Utilisateur non trouvé"}, 401
+
+        fav = Favorite.query.filter_by(user_id=user.id, partition_id=partition_id).first()
         if not fav:
             return {"message": "Non trouvé"}, 404
+
         db.session.delete(fav)
         db.session.commit()
         return {"message": "Supprimé"}, 204

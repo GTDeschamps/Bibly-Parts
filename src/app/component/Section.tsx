@@ -11,8 +11,7 @@ import {
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
-import { getFirestore, doc, setDoc, deleteDoc } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getToken } from "@/lib/auth";
 
 interface SectionProps {
   id: string;
@@ -58,9 +57,6 @@ const Section = ({
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  const db = getFirestore();
-  const auth = getAuth();
-  const user = auth.currentUser;
 
   const title = Title || "Titre inconnu";
   const artiste = Artiste || "Artiste inconnu";
@@ -84,34 +80,68 @@ const Section = ({
   };
 
   const handleAddToFavorites = async () => {
-    if (!user) return console.warn("Utilisateur non connecté");
+    const token = getToken();
+    if (!token) return console.warn("Utilisateur non connecté");
     try {
-      const favRef = doc(db, `users/${user.uid}/favorites`, id);
-      await setDoc(favRef, partitionData);
-      console.log("✅ Ajouté aux favoris Firestore");
+      const response = await fetch("http://localhost:5000/api/favorites/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ partition_id: parseInt(id) }),
+      });
+      if (response.ok) {
+        console.log("✅ Ajouté aux favoris");
+      } else {
+        const errorData = await response.text();
+        console.error("Erreur lors de l'ajout aux favoris:", errorData);
+      }
     } catch (error) {
       console.error("Erreur lors de l'ajout aux favoris:", error);
     }
   };
 
   const handleRemoveFromFavorites = async () => {
-    if (!user) return;
+    const token = getToken();
+    if (!token) return;
     try {
-      const favRef = doc(db, `users/${user.uid}/favorites`, id);
-      await deleteDoc(favRef);
-      console.log("❌ Supprimé des favoris Firestore");
-      if (onUnfavorite) onUnfavorite();
+      const response = await fetch(`http://localhost:5000/api/favorites/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        console.log("❌ Supprimé des favoris");
+        if (onUnfavorite) onUnfavorite();
+      } else {
+        const errorData = await response.json();
+        console.error("Erreur de suppression:", errorData);
+      }
     } catch (error) {
       console.error("Erreur de suppression:", error);
     }
   };
 
   const handleAddToCart = async () => {
-    if (!user) return console.warn("Utilisateur non connecté");
+    const token = getToken();
+    if (!token) return console.warn("Utilisateur non connecté");
     try {
-      const cartRef = doc(db, `users/${user.uid}/cart`, id);
-      await setDoc(cartRef, partitionData);
-      console.log("✅ Ajouté au panier Firestore");
+      const response = await fetch("http://localhost:5000/api/cart/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ partition_id: parseInt(id) }),
+      });
+      if (response.ok) {
+        console.log("✅ Ajouté au panier");
+      } else {
+        const errorData = await response.json();
+        console.error("Erreur lors de l'ajout au panier:", errorData);
+      }
     } catch (error) {
       console.error("Erreur lors de l'ajout au panier:", error);
     }

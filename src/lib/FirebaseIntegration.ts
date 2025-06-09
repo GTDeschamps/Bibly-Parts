@@ -3,7 +3,7 @@
   replacing local storage. It uses Firestore for secure, efficient data access.
 */
 
-import { db } from "@/lib/firebaseConfig";
+import { db, auth } from "@/lib/firebaseConfig";
 import {
   collection,
   getDocs,
@@ -16,6 +16,8 @@ import {
 
 // Référence vers la collection des partitions
 const partitionsCollection = collection(db, "Partitions");
+
+export { db, auth };
 
 /**
  * Fetch all partitions from Firestore

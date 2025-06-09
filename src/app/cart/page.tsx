@@ -47,13 +47,13 @@ const CartPage = () => {
 			});
 			if (!res.ok) throw new Error("Erreur suppression");
 
-			setCart((prev) => prev.filter((item) => item.id !== id));
+			setCart((prev) => prev.filter((item) => item.partition_id !== id));
 		} catch (err) {
 			console.error("Erreur suppression panier :", err);
 		}
 	};
 
-	const totalPrice = cart.reduce((sum, item) => sum + Number(item.Price || 0), 0);
+	const totalPrice = cart.reduce((sum, item) => sum + Number(item.price || 0), 0);
 
 	if (loading) return <p className="text-center text-blue-800">Chargement du panier...</p>;
 	if (error) return <p className="text-center text-red-600">Erreur : {error}</p>;
@@ -76,29 +76,29 @@ const CartPage = () => {
 				) : (
 					<div className="space-y-4">
 						{cart.map((partition) => (
-							<div key={partition.id} className="flex items-center justify-between border-b pb-2">
+							<div key={partition.cart_item_id} className="flex items-center justify-between border-b pb-2">
 								<div className="flex items-center">
 									<img
-										src={partition.cover_image_url}
-										alt={partition.Title}
+										src={partition.cover_image}
+										alt={partition.title}
 										className="w-12 h-12 rounded-md bg-gray-200"
 									/>
 									<div className="ml-4">
-										<h3 className="text-lg font-semibold">{partition.Title}</h3>
-										<p className="text-gray-600">{partition.Booklet}</p>
+										<h3 className="text-lg font-semibold">{partition.title}</h3>
+										<p className="text-gray-600">{partition.booklet}</p>
 										<p className="text-gray-600">
-											{partition.Artiste} - {partition.Type}
+											{partition.artiste} - {partition.type}
 										</p>
 									</div>
 								</div>
 								<div className="flex items-center space-x-4">
 									<button
-										onClick={() => handleRemoveFromCart(partition.id)}
+										onClick={() => handleRemoveFromCart(partition.partition_id)}
 										className="p-2 text-blue-500 hover:text-orange-500"
 									>
 										<Trash2 size={20} />
 									</button>
-									<span className="text-lg font-semibold">{partition.Price}€</span>
+									<span className="text-lg font-semibold">{partition.price}€</span>
 								</div>
 							</div>
 						))}

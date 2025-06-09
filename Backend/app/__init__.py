@@ -22,7 +22,6 @@ def create_app():
     app.config.from_object("config.Config")
 
     # Configuration minimale pour JWT
-    app.config["JWT_SECRET_KEY"] = "change-this-in-production"  # 🔐 Change-la en prod !
     jwt.init_app(app)
 
     # Custom JWT error handlers

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import Section from "../component/Section";
 
-const styles = ["Rock", "Rap", "Classique", "Metal", "Jazz", "Blues", "Ragtime", "New Age", "Folk", "Pop", "Variété française", "Variété internationale"];
-const instruments = ["Batterie", "Guitare", "Violon", "Flûte", "Trompette", "Piano", "Orchestre", "Chorale", "Harpe", "Saxophone", "Clarinette", "Accordéon", "Orgue", "Synthétiseur", "Basse", "Violoncelle"];
+const styles = ["Blues", "Musique Classique", "Hard-Rock", "Jazz", "Blues", "Ragtime", "New Age", "Folk", "Pop", "Chanson française", "Variété internationale"];
+const instruments = ["Batterie", "Guitare", "Violon", "Flûte", "Trompette", "Piano", "Orchestre", "Chorale", "Harpe", "Saxophone", "Clarinette", "Accordéon", "Orgue", "Synthétiseur", "Basse", "Violoncelle", "clavecin"];
 const supports = ["partition", "tablature"];
 
 const FilterPage = () => {
@@ -31,7 +31,7 @@ const FilterPage = () => {
         const mapped = data.map((p: any) => ({
           id: p.id,
           Title: p.Title || p.title,
-          Artiste: p.Artiste || p.author || p.Artist || "Artiste inconnu",
+          Artiste: p.Artiste || p.artiste || "Artiste inconnu",
           Instrument: p.Instrument || p.instrument || "",
           Style: p.Style || p.style || "",
           Type: p.Type || p.type || "",
@@ -148,7 +148,7 @@ const FilterPage = () => {
             filteredResults.map((item) => (
               <Section
                 key={item.id}
-                id={item.id}
+                id={item.partition_id}
                 Title={item.Title}
                 Artiste={item.Artiste}
                 Instrument={item.Instrument}

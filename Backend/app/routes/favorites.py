@@ -30,9 +30,13 @@ class FavoriteList(Resource):
                     'favorite_id': fav.id,
                     'partition_id': partition.id,
                     'title': partition.title,
-                    'artist': getattr(partition, 'artist', 'Inconnu'),  # adapte selon champ réel
+                    'artiste': getattr(partition, 'artiste', 'Inconnu'),
+                    'instrument': getattr(partition, 'instrument', 'Non spécifié'),
+                    'style': getattr(partition, 'style', 'Non spécifié'),
+                    'type': getattr(partition, 'type', 'Non spécifié'),
+                    'booklet': getattr(partition, 'booklet', 'N/A'),
+                    'price': getattr(partition, 'price', 0),
                     'cover_image': getattr(partition, 'cover_image', None),
-                    # ajoute ici d'autres champs utiles que tu souhaites envoyer
                 })
         return result, 200
 

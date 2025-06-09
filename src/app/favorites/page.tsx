@@ -82,17 +82,17 @@ const FavoritesPage: React.FC = () => {
 						{favorites.map((item) => (
 							<Section
 								key={item.favorite_id}
-    id={item.partition_id} // pour la suppression par partition_id
-    Cover={item.cover_image}
-    Title={item.title}
-    Artiste={item.artist}
-    Instrument={item.instrument}
-    Style={item.style}
-    Type={item.type}
-    Booklet={item.booklet}
-    Price={item.price}
-    isFavoritePage={true}
-    onUnfavorite={() => handleRemoveFromFavorites(item.partition_id)}
+								id={item.partition_id} // pour la suppression par partition_id
+								Cover={item.cover_image}
+								Title={item.title}
+								Artiste={item.artiste}
+								Instrument={item.instrument}
+								Style={item.style}
+								Type={item.type}
+								Booklet={item.booklet}
+								Price={item.price}
+								isFavoritePage={true}
+								onUnfavorite={() => handleRemoveFromFavorites(item.partition_id)}
 							/>
 						))}
 					</div>

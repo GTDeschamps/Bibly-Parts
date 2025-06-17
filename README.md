@@ -28,7 +28,7 @@ Le projet propose une solution complète avec :
 ### 1️⃣ Lancer le backend
 
 Dans le dossier `backend/` :
-```bash
+
 # Activez votre environnement virtuel si nécessaire
 python3 -m venv venv
 source venv/bin/activate  # sous Linux/Mac
@@ -46,7 +46,7 @@ python run.py
 ### 2️⃣ Lancer le frontend
 Dans le dossier frontend/ (ou racine si Next.js est à la racine) :
 
-```bash
+
 Copier le code
 npm install
 npm run dev

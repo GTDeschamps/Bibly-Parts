@@ -41,10 +41,12 @@ pip install -r requirements.txt
 python run.py
 ➡️ Le backend est accessible sur http://127.0.0.1:5000
 
-2️⃣ Lancer le frontend
+---
+
+### 2️⃣ Lancer le frontend
 Dans le dossier frontend/ (ou racine si Next.js est à la racine) :
 
-bash
+```bash
 Copier le code
 npm install
 npm run dev
@@ -58,6 +60,7 @@ bash
 Copier le code
 python -m unittest discover tests
 ✅ Les tests utilisent une base temporaire SQLite en mémoire.
+
 
 🗂 Structure du projet
 bash

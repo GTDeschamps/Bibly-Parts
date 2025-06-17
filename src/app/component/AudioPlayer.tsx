@@ -3,44 +3,86 @@
 import { useState, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Music, SkipBack, SkipForward } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useAudio } from './context/audioContext';
 
 const AudioPlayer = () => {
+	const {
+		trackSrc: contextTrackSrc,
+		trackTitle: contextTrackTitle,
+		play: triggerPlay
+	} = useAudio();
+
+	const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
 	const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [trackTitle, setTrackTitle] = useState('Aucun morceau sélectionné');
-  const [trackSrc, setTrackSrc] = useState('');
-  const [trackIndex, setTrackIndex] = useState(0);
-  const [trackList, setTrackList] = useState<string[]>([]);
-  const pathname = usePathname();
+	const [currentTime, setCurrentTime] = useState(0);
+	const [duration, setDuration] = useState(0);
+	const [volume, setVolume] = useState(1);
+	const [isMuted, setIsMuted] = useState(false);
+	const [trackTitle, setTrackTitle] = useState('Aucun morceau sélectionné');
+	const [trackSrc, setTrackSrc] = useState('');
+	const [trackIndex, setTrackIndex] = useState(0);
+	const [trackList, setTrackList] = useState<string[]>([]);
+	const pathname = usePathname();
 
 	useEffect(() => {
-		let audio = new Audio(trackSrc);
-		audio.volume = isMuted ? 0 : volume;
-
-		const updateTime = () => setCurrentTime(audio.currentTime);
-		const updateMetadata = () => setDuration(audio.duration);
-		const handleEnded = () => setIsPlaying(false);
-
-		audio.addEventListener('timeupdate', updateTime);
-		audio.addEventListener('loadedmetadata', updateMetadata);
-		audio.addEventListener('ended', handleEnded);
-
-		if (isPlaying) {
-			audio.play();
-		} else {
-			audio.pause();
+		if (contextTrackSrc) {
+			setTrackSrc(contextTrackSrc);
 		}
+	}, [contextTrackSrc]);
+
+	useEffect(() => {
+		if (contextTrackTitle) {
+			setTrackTitle(contextTrackTitle);
+		}
+	}, [contextTrackTitle]);
+
+	useEffect(() => {
+		if (!trackSrc) {
+			return;
+		}
+		const newAudio = new Audio(trackSrc);
+		setAudio(newAudio);
+		setIsPlaying(true);
+		setCurrentTime(0);
+		setDuration(0);
+
+		const handleLoadedMetadata = () => {
+			setDuration(newAudio.duration);
+		};
+		const handleTimeUpdate = () => {
+			setCurrentTime(newAudio.currentTime);
+		};
+		const handleEnded = () => {
+			setIsPlaying(false);
+		};
+
+		newAudio.addEventListener('loadedmetadata', handleLoadedMetadata);
+		newAudio.addEventListener('timeupdate', handleTimeUpdate);
+		newAudio.addEventListener('ended', handleEnded);
 
 		return () => {
-			audio.removeEventListener('timeupdate', updateTime);
-			audio.removeEventListener('loadedmetadata', updateMetadata);
-			audio.removeEventListener('ended', handleEnded);
-			audio.pause();
+			newAudio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+			newAudio.removeEventListener('timeupdate', handleTimeUpdate);
+			newAudio.removeEventListener('ended', handleEnded);
+			newAudio.pause();
 		};
-	}, [trackSrc, isPlaying, volume, isMuted]);
+	}, [trackSrc]);
+
+	useEffect(() => {
+		if (audio) {
+			if (isPlaying) {
+				audio.play().catch((e) => console.error('Error playing audio:', e));
+			} else {
+				audio.pause();
+			}
+		}
+	}, [isPlaying, audio]);
+
+	useEffect(() => {
+		if (audio) {
+			audio.volume = isMuted ? 0 : volume;
+		}
+	}, [volume, isMuted, audio]);
 
 	const togglePlayPause = () => {
 		setIsPlaying(!isPlaying);

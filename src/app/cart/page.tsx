@@ -9,6 +9,7 @@ const CartPage = () => {
 	const [cart, setCart] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
+	const [isOrdering, setIsOrdering] = useState(false);
 	const router = useRouter();
 
 	useEffect(() => {
@@ -50,6 +51,41 @@ const CartPage = () => {
 			setCart((prev) => prev.filter((item) => item.partition_id !== id));
 		} catch (err) {
 			console.error("Erreur suppression panier :", err);
+		}
+	};
+
+	const handleOrder = async () => {
+		if (cart.length === 0) return;
+		try {
+			setIsOrdering(true);
+			const token = getToken();
+			if (!token) throw new Error("Utilisateur non connecté");
+
+			const res = await fetch("http://localhost:5000/api/orders", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({
+					items: cart.map((item) => ({
+						partition_id: item.partition_id,
+						price: item.price,
+					})),
+				}),
+			});
+
+			if (!res.ok) throw new Error("Erreur lors de la validation de la commande");
+
+			// Optionnel : vider le panier local
+			setCart([]);
+
+			// Redirige vers la page des commandes
+			router.push("/order");
+		} catch (err: any) {
+			alert(err.message || "Erreur lors de la commande");
+		} finally {
+			setIsOrdering(false);
 		}
 	};
 
@@ -111,10 +147,15 @@ const CartPage = () => {
 					<div className="bg-gray-100 p-4 rounded-lg shadow-md text-right w-64 border border-blue-600">
 						<p className="text-xl font-bold">Total: {totalPrice.toFixed(2)} €</p>
 						<button
-							onClick={() => router.push("/paiement")}
-							className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-800 w-full"
+							onClick={handleOrder}
+							disabled={isOrdering}
+							className={`mt-4 px-4 py-2 rounded-lg w-full ${
+								isOrdering
+									? "bg-gray-400 cursor-not-allowed"
+									: "bg-blue-600 hover:bg-blue-800 text-white"
+							}`}
 						>
-							Commander
+							{isOrdering ? "Validation..." : "Commander"}
 						</button>
 					</div>
 				</div>

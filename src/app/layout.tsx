@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
 import Header from "./component/header";
 import Footer from "./component/footer";
+import { AudioProvider } from './component/context/audioContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,14 +26,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
-      >
-        <Header />
-        <main className="flex-grow pt-24 pb-12 overflow-y-auto">{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <AudioProvider>
+      <html lang="fr">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        >
+          <Header />
+          <main className="flex-grow pt-24 pb-12 overflow-y-auto">{children}</main>
+          <Footer />
+        </body>
+      </html>
+    </AudioProvider>
   );
 }

@@ -1,114 +1,132 @@
-# Bibly-Parts
 
-**Bibly-Parts** est un site web dédié à la distribution et à l'achat de partitions musicales.
-Le projet propose une solution complète avec :
-- Frontend en **Next.js / TypeScript / Tailwind CSS**
-- Backend en **Flask / SQLAlchemy**
-- Stockage des médias (PDF, audio, images) via **Cloudinary**
+# Bibly-Parts 🎶
 
-## ✨ Fonctionnalités principales
-
-- **Gestion utilisateur complète** : création de compte, connexion, gestion de profil, modification du mot de passe, suppression de compte.
-- **Base de données des partitions** : recherche par style, instrument, auteur, titre ; prévisualisation et pré-écoute.
-- **Panier et favoris** : ajout, retrait, commande (simulée).
-- **Design épuré** : couleurs crème et sépia, évoquant l’esthétique des anciennes partitions.
+**Bibly-Parts** est un site web dédié à la vente, au partage et à la gestion de **partitions musicales**.
+Ce projet combine un frontend moderne en **Next.js / TypeScript / Tailwind CSS** avec un backend en **Flask / SQLAlchemy**, le tout structuré autour d’une architecture claire et évolutive.
 
 ---
 
-## 🚀 Lancer le projet en local
+## 🎯 Objectifs du projet
 
-### 🔹 Prérequis
-
-- **Node.js** + **npm** (ou yarn/pnpm)
-- **Python 3**
-- **Un environnement virtuel Python (recommandé)**
-
----
-
-### 1️⃣ Lancer le backend
-
-Dans le dossier `backend/` :
-
-# Activez votre environnement virtuel si nécessaire
-python3 -m venv venv
-source venv/bin/activate  # sous Linux/Mac
-# ou
-venv\Scripts\activate  # sous Windows
-
-pip install -r requirements.txt
-
-# Démarrer le serveur Flask
-python run.py
-➡️ Le backend est accessible sur http://127.0.0.1:5000
+- Proposer un **catalogue de partitions musicales** avec recherche par style, instrument, auteur ou titre.
+- Permettre la **prévisualisation des partitions** (PDF) et la **pré-écoute** (audio).
+- Offrir une **gestion complète des utilisateurs** : inscription, connexion, modification des données, suppression du compte.
+- Gérer un **panier d’achat** et une **liste de favoris**.
+- Fournir un design soigné évoquant les partitions anciennes (teintes crème / sépia).
 
 ---
 
-### 2️⃣ Lancer le frontend
-Dans le dossier frontend/ (ou racine si Next.js est à la racine) :
+## ⚙️ Architecture du projet
 
-Copier le code
-npm install
-npm run dev
-➡️ Le frontend est accessible sur http://localhost:3000
+### 🌐 Frontend
+- **Next.js / React / TypeScript**
+- **Tailwind CSS** pour le design responsive et accessible
+- **Gestion des états :** hooks React + contextes
 
-🧪 Exécuter les tests unitaires (backend)
-Les tests se trouvent dans le dossier tests/.
-Pour les exécuter :
+### 🔗 Backend
+- **Flask**
+- **SQLAlchemy** (base SQLite en dev, extensible PostgreSQL si besoin)
+- **JWT pour l’authentification**
+- **Cloudinary** pour le stockage des médias
 
-bash
-Copier le code
-python -m unittest discover tests
-✅ Les tests utilisent une base temporaire SQLite en mémoire.
+---
 
+## 📌 Diagrammes du projet
 
-🗂 Structure du projet
+### 📝 Diagramme Life_cycle
+
+![Diagramme](./docs/cycle de vie Bibly-Parts.jpg)
+
+---
+
+### 🏗 Diagramme d’architecture technique
+
+![Framworks](./docs/Architecture Bibly-Parts.jpg)
+
+Les diagrammes détaillés (modèles, séquence) figurent dans les **annexes** du cahier des charges.
+
+---
+
+## 🗂 Structure du projet
+
 ````bash
-Copier le code
 /backend
-  /models         → Modèles SQLAlchemy
-  /routes         → Routes Flask
-  /static         → Fichiers statiques si nécessaire
-  /templates      → Templates Jinja (si utilisés)
-  run.py          → Lancement du serveur Flask
+/models → Modèles SQLAlchemy (User, Partition, Panier, etc.)
+/routes → Routes Flask
+run.py → Serveur Flask
 /frontend
-  /app            → Composants Next.js (App Router)
-  /public         → Fichiers publics
-  /styles         → Fichiers Tailwind
+/app → Pages et composants Next.js
+/public → Images publiques
 /tests
-  test_user.py    → Tests liés aux utilisateurs
-  test_partition.py → Tests des partitions
-README.md
-``
+test_*.py → Tests unitaires du backend
+/docs
+uml_global.png → Diagramme UML
+architecture_framework.png → Schéma d’architecture
+````
 
-🛠 Choix techniques
-Next.js / React + Tailwind CSS pour le frontend
+---
 
-Flask + SQLAlchemy pour le backend
+## 🚀 Lancement du projet en local (résumé)
 
-Cloudinary pour héberger les fichiers médias
+### Backend
+````bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python run.py
+````
 
-JWT pour la gestion des tokens d'authentification
+### Frontend
 
-📦 Déploiement
-Frontend : compatible déploiement sur Vercel
+````bash
+`cd frontend
+npm install
+npm run dev`
+````
 
-Backend : prêt pour un hébergement Python (Railway, Render, VPS…)
+➡️ Frontend : [http://localhost:3000](http://localhost:3000)
+➡️ Backend : [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
-📌 Accès au projet
-Frontend : http://localhost:3000
 
-Backend : http://127.0.0.1:5000
+### Tests unitaires
+````
+`python -m unittest discover tests`
+````
 
-🔗 Ressources utiles
-Next.js Documentation
 
-Flask Documentation
+✅ Les tests couvrent la gestion des utilisateurs, des partitions et des paniers.
 
-SQLAlchemy Documentation
+----------
 
-Tailwind CSS
+## 🛠 Choix techniques majeurs
 
-Cloudinary
+-   **Frontend :** Next.js (App Router), TypeScript, Tailwind CSS
 
-🤝 Auteurs
-Ce projet a été réalisé par Gaël Deschamps dans le cadre d’un projet RNCP Niveau 6, sanctionnant un formation de Developpeur FullStack au sein d'Holberton School Laval.
+-   **Backend :** Flask + SQLAlchemy
+
+-   **Stockage médias :** Cloudinary
+
+-   **Authentification :** JWT
+
+-   **Base en développement :** SQLite
+
+
+----------
+
+## 📚 Ressources annexes
+
+-   Diagrammes UML détaillés (voir `docs/uml_détails/`)
+
+-   Cahier des charges complet
+
+-   Plan de tests
+
+
+----------
+
+## 🤝 Réalisé par Gaël Deschamps
+
+Projet réalisé dans le cadre d’une certification **RNCP Niveau 6**.
+
+#### Holberton School Laval  - #C21 (2023-2025)

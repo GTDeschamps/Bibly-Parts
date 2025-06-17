@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bibly-Parts
 
-## Getting Started
+**Bibly-Parts** est un site web dédié à la distribution et à l'achat de partitions musicales.
+Le projet propose une solution complète avec :
+- Frontend en **Next.js / TypeScript / Tailwind CSS**
+- Backend en **Flask / SQLAlchemy**
+- Stockage des médias (PDF, audio, images) via **Cloudinary**
 
-First, run the development server:
+## ✨ Fonctionnalités principales
 
+- **Gestion utilisateur complète** : création de compte, connexion, gestion de profil, modification du mot de passe, suppression de compte.
+- **Base de données des partitions** : recherche par style, instrument, auteur, titre ; prévisualisation et pré-écoute.
+- **Panier et favoris** : ajout, retrait, commande (simulée).
+- **Design épuré** : couleurs crème et sépia, évoquant l’esthétique des anciennes partitions.
+
+---
+
+## 🚀 Lancer le projet en local
+
+### 🔹 Prérequis
+
+- **Node.js** + **npm** (ou yarn/pnpm)
+- **Python 3**
+- **Un environnement virtuel Python (recommandé)**
+
+---
+
+### 1️⃣ Lancer le backend
+
+Dans le dossier `backend/` :
 ```bash
+# Activez votre environnement virtuel si nécessaire
+python3 -m venv venv
+source venv/bin/activate  # sous Linux/Mac
+# ou
+venv\Scripts\activate  # sous Windows
+
+pip install -r requirements.txt
+
+# Démarrer le serveur Flask
+python run.py
+➡️ Le backend est accessible sur http://127.0.0.1:5000
+
+2️⃣ Lancer le frontend
+Dans le dossier frontend/ (ou racine si Next.js est à la racine) :
+
+bash
+Copier le code
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+➡️ Le frontend est accessible sur http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🧪 Exécuter les tests unitaires (backend)
+Les tests se trouvent dans le dossier tests/.
+Pour les exécuter :
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+bash
+Copier le code
+python -m unittest discover tests
+✅ Les tests utilisent une base temporaire SQLite en mémoire.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🗂 Structure du projet
+bash
+Copier le code
+/backend
+  /models         → Modèles SQLAlchemy
+  /routes         → Routes Flask
+  /static         → Fichiers statiques si nécessaire
+  /templates      → Templates Jinja (si utilisés)
+  run.py          → Lancement du serveur Flask
+/frontend
+  /app            → Composants Next.js (App Router)
+  /public         → Fichiers publics
+  /styles         → Fichiers Tailwind
+/tests
+  test_user.py    → Tests liés aux utilisateurs
+  test_partition.py → Tests des partitions
+README.md
+🛠 Choix techniques
+Next.js / React + Tailwind CSS pour le frontend
 
-## Learn More
+Flask + SQLAlchemy pour le backend
 
-To learn more about Next.js, take a look at the following resources:
+Cloudinary pour héberger les fichiers médias
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+JWT pour la gestion des tokens d'authentification
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+📦 Déploiement
+Frontend : compatible déploiement sur Vercel
 
-## Deploy on Vercel
+Backend : prêt pour un hébergement Python (Railway, Render, VPS…)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+📌 Accès au projet
+Frontend : http://localhost:3000
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Backend : http://127.0.0.1:5000
+
+🔗 Ressources utiles
+Next.js Documentation
+
+Flask Documentation
+
+SQLAlchemy Documentation
+
+Tailwind CSS
+
+Cloudinary
+
+🤝 Auteurs
+Ce projet a été réalisé par Gaël Deschamps dans le cadre d’un projet RNCP Niveau 6, sanctionnant un formation de Developpeur FullStack au sein d'Holberton School Laval.

@@ -46,7 +46,6 @@ python run.py
 ### 2️⃣ Lancer le frontend
 Dans le dossier frontend/ (ou racine si Next.js est à la racine) :
 
-
 Copier le code
 npm install
 npm run dev
@@ -63,7 +62,7 @@ python -m unittest discover tests
 
 
 🗂 Structure du projet
-bash
+````bash
 Copier le code
 /backend
   /models         → Modèles SQLAlchemy
@@ -79,6 +78,8 @@ Copier le code
   test_user.py    → Tests liés aux utilisateurs
   test_partition.py → Tests des partitions
 README.md
+``
+
 🛠 Choix techniques
 Next.js / React + Tailwind CSS pour le frontend
 

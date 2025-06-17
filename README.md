@@ -35,13 +35,15 @@ Ce projet combine un frontend moderne en **Next.js / TypeScript / Tailwind CSS**
 
 ### 📝 Diagramme Life_cycle
 
-![Diagramme](./docs/cycle de vie Bibly-Parts.jpg)
+bash
+(../docs/cycle de vie Bibly-Parts.jpg)
 
 ---
 
 ### 🏗 Diagramme d’architecture technique
 
-![Framworks](./docs/Architecture Bibly-Parts.jpg)
+bash
+(../docs/Architecture Bibly-Parts.jpg)
 
 Les diagrammes détaillés (modèles, séquence) figurent dans les **annexes** du cahier des charges.
 

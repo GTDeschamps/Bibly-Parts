@@ -8,30 +8,41 @@ const FavoritesPage: React.FC = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const fetchFavorites = async () => {
-		try {
-			const token = localStorage.getItem("token");
-			console.log("Token:", token);
-			if (!token) throw new Error("Utilisateur non authentifié");
+const fetchFavorites = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    console.log("Token:", token);
+    if (!token) throw new Error("Utilisateur non authentifié");
 
-			const res = await fetch("http://localhost:5000/api/favorites/", {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			});
+    const res = await fetch("http://localhost:5000/api/favorites/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-			if (!res.ok) throw new Error("Échec du chargement des favoris");
+    if (!res.ok) throw new Error("Échec du chargement des favoris");
 
-			const data = await res.json();
-			console.log("Données favorites :", data);
-			setFavorites(data.reverse());
-		} catch (err: any) {
-			console.error("❌ Erreur chargement favoris :", err.message);
-			setError(err.message);
-		} finally {
-			setLoading(false);
-		}
-	};
+    const data = await res.json();
+    console.log("Données favorites :", data);
+
+    // Vérifie que data est bien un tableau et que chaque item contient l'URL audio
+    if (!Array.isArray(data)) throw new Error("Données reçues invalides");
+
+    // Exemple de check sur le premier élément
+    if (data.length > 0 && !data[0].audio_file) {
+      console.warn("Les favoris reçus n'ont pas de champ audio_file");
+	  console.log("Premier favori exemple:", data[0]);
+    }
+
+    setFavorites(data.reverse());
+  } catch (err: any) {
+    console.error("❌ Erreur chargement favoris :", err.message);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
 	const handleRemoveFromFavorites = async (id: string) => {
 		try {
@@ -91,6 +102,7 @@ const FavoritesPage: React.FC = () => {
 								Type={item.type}
 								Booklet={item.booklet}
 								Price={item.price}
+								Audio={item.audio_file}
 								isFavoritePage={true}
 								onUnfavorite={() => handleRemoveFromFavorites(item.partition_id)}
 							/>

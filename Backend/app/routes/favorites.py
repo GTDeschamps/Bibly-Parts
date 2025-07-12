@@ -37,6 +37,7 @@ class FavoriteList(Resource):
                     'booklet': getattr(partition, 'booklet', 'N/A'),
                     'price': getattr(partition, 'price', 0),
                     'cover_image': getattr(partition, 'cover_image', None),
+                    'audio_file': getattr(partition, 'audio_file', None),
                 })
         return result, 200
 

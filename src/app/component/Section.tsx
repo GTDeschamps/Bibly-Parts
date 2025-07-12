@@ -26,10 +26,10 @@ interface SectionProps {
   Booklet: string;
   Price: number;
   Cover: string;
-  Audio: string;
+  Audio: string; // correspond à audio_file
   isFavoritePage?: boolean;
   isCartPage?: boolean;
-  pdfFileName?: string; // utile pour nommer le fichier téléchargé
+  pdfFileName?: string;
   onUnfavorite?: () => void;
   onUnCart?: () => void;
 }
@@ -51,20 +51,29 @@ const Section = ({
   onUnfavorite,
   onUnCart,
 }: SectionProps) => {
+  console.log("Prop Audio reçue :", Audio)
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { setTrackSrc, setTrackTitle, play } = useAudio();
+  const {
+    setTrackSrc,
+    setTrackTitle,
+    setTrackAuthor,
+    setTrackCover,
+    play,
+  } = useAudio();
 
   const token = getToken();
 
   const handlePlay = () => {
-    if (Audio) {
+    if (Audio && Audio.startsWith("https://res.cloudinary.com/")) {
       setTrackSrc(Audio);
       setTrackTitle(Title);
+      setTrackAuthor(Artiste);
+      setTrackCover(Cover);
       play();
-      console.log("Lecture du morceau :", Title);
+      console.log("Lecture de :", Title);
     } else {
-      console.warn("Pas d'URL audio disponible");
+      console.warn("Pas d'URL audio disponible pour", Title);
     }
   };
 

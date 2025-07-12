@@ -37,6 +37,7 @@ const FilterPage = () => {
           Type: p.Type || p.type || "",
           Booklet: p.Booklet || p.booklet || "",
           Price: p.Price || p.price || 0,
+          Audio: p.AudioFile || p.audio_file || "",
           CoverImage: p.CoverImage || p.cover_image || p.Cover || "",
         }));
 
@@ -157,6 +158,7 @@ const FilterPage = () => {
                 Booklet={item.Booklet}
                 Price={item.Price}
                 Cover={item.CoverImage}
+                Audio={item.Audio}
               />
             ))
           ) : (

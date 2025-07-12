@@ -1,29 +1,45 @@
 'use client';
 
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
-type AudioContextType = {
+interface AudioContextType {
   trackSrc: string;
-  setTrackSrc: (src: string) => void;
   trackTitle: string;
+  trackAuthor: string;
+  trackCover: string;
+  setTrackSrc: (src: string) => void;
   setTrackTitle: (title: string) => void;
+  setTrackAuthor: (author: string) => void;
+  setTrackCover: (cover: string) => void;
   play: () => void;
-};
+}
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
   const [trackSrc, setTrackSrc] = useState('');
   const [trackTitle, setTrackTitle] = useState('');
-  const [shouldPlay, setShouldPlay] = useState(false);
+  const [trackAuthor, setTrackAuthor] = useState('');
+  const [trackCover, setTrackCover] = useState('');
 
   const play = () => {
-    setShouldPlay(true); // utilisé par le player pour déclencher la lecture
-    setTimeout(() => setShouldPlay(false), 100); // reset pour ne pas relancer en boucle
+    // utile pour déclencher un flag ou effet dans AudioPlayer
   };
 
   return (
-    <AudioContext.Provider value={{ trackSrc, setTrackSrc, trackTitle, setTrackTitle, play }}>
+    <AudioContext.Provider
+      value={{
+        trackSrc,
+        trackTitle,
+        trackAuthor,
+        trackCover,
+        setTrackSrc,
+        setTrackTitle,
+        setTrackAuthor,
+        setTrackCover,
+        play,
+      }}
+    >
       {children}
     </AudioContext.Provider>
   );
@@ -31,6 +47,6 @@ export const AudioProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAudio = () => {
   const context = useContext(AudioContext);
-  if (!context) throw new Error('useAudio must be used within AudioProvider');
+  if (!context) throw new Error("useAudio must be used within AudioProvider");
   return context;
 };

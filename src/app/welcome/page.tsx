@@ -34,8 +34,8 @@ const WelcomePage = () => {
 					Type: p.type,
 					Booklet: p.booklet,
 					Price: p.price,
+					AudioFile: p.audio_file,
 					CoverImage: getValidImage(p.cover_image)
-,
 				}));
 
 				const partitionList = normalized.filter((p) => p.Type?.toLowerCase() === "partition");
@@ -74,20 +74,24 @@ const WelcomePage = () => {
 			<div className="mb-8 border-2 border-blue-900 rounded-lg p-4">
 				<h2 className="text-2xl font-bold text-blue-900 mb-4">Partition à la Une</h2>
 				<div className="space-y-4">
-					{featuredPartitions.map((item) => (
-						<Section
-							key={item.id}
-							id={item.id}
-							Title={item.Title}
-							Artiste={item.Artiste}
-							Instrument={item.Instrument}
-							Style={item.Style}
-							Type={item.Type}
-							Booklet={item.Booklet}
-							Price={item.Price}
-							Cover={item.CoverImage}
-						/>
-					))}
+					{featuredPartitions.map((item) => {
+						console.log("partition à la une :", item);
+						return (
+							<Section
+								key={item.id}
+								id={item.id}
+								Title={item.Title}
+								Artiste={item.Artiste}
+								Instrument={item.Instrument}
+								Style={item.Style}
+								Type={item.Type}
+								Booklet={item.Booklet}
+								Price={item.Price}
+								Cover={item.CoverImage}
+								Audio={item.AudioFile}
+							/>
+						);
+					})}
 				</div>
 			</div>
 
@@ -95,20 +99,24 @@ const WelcomePage = () => {
 			<div className="mb-8 border-2 border-blue-900 rounded-lg p-4">
 				<h2 className="text-2xl font-bold text-blue-900 mb-4">Tablature à la Une</h2>
 				<div className="space-y-4">
-					{featuredTablatures.map((item) => (
-						<Section
-							key={item.id}
-							id={item.id}
-							Title={item.Title}
-							Artiste={item.Artiste}
-							Instrument={item.Instrument}
-							Style={item.Style}
-							Type={item.Type}
-							Booklet={item.Booklet}
-							Price={item.Price}
-							Cover={item.CoverImage}
-						/>
-					))}
+					{featuredTablatures.map((item) => {
+						console.log("Tablature à la une :", item);
+						return (
+							<Section
+								key={item.id}
+								id={item.id}
+								Title={item.Title}
+								Artiste={item.Artiste}
+								Instrument={item.Instrument}
+								Style={item.Style}
+								Type={item.Type}
+								Booklet={item.Booklet}
+								Price={item.Price}
+								Cover={item.CoverImage}
+								Audio={item.AudioFile}
+							/>
+						);
+					})}
 				</div>
 			</div>
 		</div>
